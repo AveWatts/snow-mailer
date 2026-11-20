@@ -6,12 +6,14 @@ from zoneinfo import ZoneInfo
 
 from . import analysis, areas, history, scoring
 from .config import GOOD_DEPTH_IN, PERMITS, SKIABLE_DEPTH_IN, STORM_RAIN_ON_SNOW_IN, STORM_SNOW_IN
-from .sources import avalanche, nbm, nohrsc, nordic, nws, resorts, roads, snotel
+from .sources import avalanche, drive, nbm, nohrsc, nordic, nws, resorts, roads, snotel
 
 log = logging.getLogger(__name__)
 PACIFIC = ZoneInfo("America/Los_Angeles")
 FORECAST_CENTERS = {"NWAC", "COAA"}
 GLACIER_CAP_IN = 300
+BEST_DEPTH_CAP_IN = 120
+BEST_FRESH_CAP_IN = 24
 KINDS = ("downhill", "nordic", "backcountry")
 
 
@@ -51,6 +53,14 @@ def snowpack(all_areas, src, now):
                          pool.map(lambda a: src.run(f"NOHRSC {a.id}", nohrsc.point, a.lat, a.lon, default={}),
                                   all_areas)))
     return station_obs, model
+
+
+def ski_score(depth_in, fresh_in):
+    """Best-bets ranking: coverage and fresh snow, weighted equally. Depth stops counting at
+    BEST_DEPTH_CAP_IN (full coverage; glacier readings would otherwise always win), fresh snow at
+    BEST_FRESH_CAP_IN."""
+    return (min(depth_in, BEST_DEPTH_CAP_IN) / BEST_DEPTH_CAP_IN
+            + min(fresh_in, BEST_FRESH_CAP_IN) / BEST_FRESH_CAP_IN)
 
 
 def _links(rows, key):
@@ -148,6 +158,13 @@ def build_thursday(now=None):
     resort_data = resorts.fetch_all(now, src.errors)
     groom_data = nordic.fetch_all(now, src.errors)
     road_data = roads.fetch(zones, src.errors)
+    by_id = {a.id: a for a in all_areas}
+    base = src.run("base location", drive.base_point)
+    drive_s = {}
+    if base:
+        access = {a.id: (by_id[a.access_from] if a.access_from else a) for a in all_areas}
+        drive_s = src.run("drive times", drive.drive_seconds, base,
+                          {aid: (x.lat, x.lon) for aid, x in access.items()}, default={})
 
     run = src.run("NBM run", nbm.latest_run, now, nbm.hours_to(now, mon.astimezone(timezone.utc)))
     forecast, h_now, h_sat, h_mon = None, 0, 0, 0
@@ -236,6 +253,7 @@ def build_thursday(now=None):
             "area": a, "score": score, "condition": cond, "status": status,
             "weekend_score": wk_score, "weekend_condition": wk_cond, "weekend_status": wk_status,
             "depth_change_in": change, "avalanche": avy, "resort": resort, "grooming": groom,
+            "drive_s": drive_s.get(a.id), "drive_via": by_id[a.access_from].name if a.access_from else None,
             **facts, **wk_facts,
         }
 
@@ -260,16 +278,19 @@ def build_thursday(now=None):
 
     best = {}
     for kind in KINDS:
-        cands = [r for r in rows.values() if r["area"].kind == kind and r["weekend_score"]
+        cands = [r for r in rows.values() if r["area"].kind == kind and r["projected_depth_in"] is not None
                  and r["weekend_status"].value in ("Open", "Limited")]
-        cands.sort(key=lambda r: (r["weekend_score"] * r["weekend_condition"].confidence), reverse=True)
+        for r in cands:
+            r["fresh_in"] = round(r["new_3d_in"] + (r["snow_by_sun_in"] or 0), 1)
+            r["ski_score"] = ski_score(r["projected_depth_in"], r["fresh_in"])
+        cands.sort(key=lambda r: r["ski_score"], reverse=True)
         best[kind] = cands[:3]
 
     openings = sorted((r["resort"]["opening_date"], r["area"].name) for r in rows.values()
                       if r["resort"] and r["resort"].get("opening_date") and r["status"].value == "Closed")
 
     return {
-        "kind": "thursday", "openings": openings, "generated": now, "generated_local": now_local,
+        "kind": "thursday", "openings": openings, "has_drive": bool(drive_s), "generated": now, "generated_local": now_local,
         "weekend_start": sat, "weekend_end": mon - timedelta(days=1),
         "nbm_run": run, "zones": zone_views, "rows": rows, "best": best,
         "errors": src.errors, "skiable_depth": SKIABLE_DEPTH_IN, "good_depth": GOOD_DEPTH_IN,

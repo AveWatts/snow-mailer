@@ -15,6 +15,7 @@ class Area:
     zone: "Zone" = field(repr=False, default=None)
     permanent_snowfield: bool = False
     nws_grid: str | None = None
+    access_from: str | None = None
 
 
 @dataclass

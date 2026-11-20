@@ -34,6 +34,7 @@ jobs:
           SMTP_USER: ${{ secrets.SMTP_USER }}
           SMTP_APP_PASSWORD: ${{ secrets.SMTP_APP_PASSWORD }}
           REPORT_TO: ${{ secrets.REPORT_TO }}
+          BASE_LOCATION: ${{ secrets.BASE_LOCATION || vars.BASE_LOCATION }}
       - if: steps.gate.outputs.go == 'true' && inputs.dry_run
         uses: actions/upload-artifact@v4
         with:

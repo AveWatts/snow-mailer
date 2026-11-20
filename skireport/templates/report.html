@@ -18,7 +18,7 @@
 
 <h1 style="font-size:20px;margin:0 0 2px">Cascades Ski Report</h1>
 <p style="margin:0 0 2px">{{ generated_local.strftime("%A, %B %-d") }}. Weekend: {{ weekend_start.strftime("%a %b %-d") }} - {{ weekend_end.strftime("%a %b %-d") }}.</p>
-<p style="margin:0 0 18px;font-size:12px;color:#666">Confidence: {{ dots(80) }} high &nbsp; {{ dots(50) }} medium &nbsp; {{ dots(20) }} low. Forecast: NBM {{ nbm_run.strftime("%HZ %b %-d") if nbm_run else "unavailable" }}.</p>
+<p style="margin:0 0 18px;font-size:12px;color:#666">Confidence: {{ dots(80) }} high &nbsp; {{ dots(50) }} medium &nbsp; {{ dots(20) }} low. Fresh: new snow in the last 3 days plus forecast snowfall through Sunday. Forecast: NBM {{ nbm_run.strftime("%HZ %b %-d") if nbm_run else "unavailable" }}.</p>
 
 <h2 style="font-size:16px;margin:0 0 4px;padding-bottom:4px;border-bottom:2px solid #111">Best bets this weekend</h2>
 {% for kind in ["backcountry", "nordic", "downhill"] %}
@@ -30,7 +30,7 @@
 <tr>
 <td style="width:34px;padding:6px 0;vertical-align:top;{{ border }}">{{ badge(r.weekend_score, 26) }}</td>
 <td style="padding:6px 8px;vertical-align:top;{{ border }}"><b>{{ r.area.name }}</b> <span style="color:#666">{{ r.weekend_condition.value }}</span><br>
-<span style="font-size:12px;color:#666">{{ r.area.zone.name }} &middot; {{ r.depth_change_by_sun_in|signed }} by Sun &middot; snow level {{ level(r.snow_level_weekend, r.area.elev_ft) }} ft</span></td>
+<span style="font-size:12px;color:#666">{{ r.area.zone.name }}{% if r.drive_s is not none %} &middot; {{ r.drive_s|duration }} drive{% endif %} &middot; {{ r.projected_depth_in|inches }} deep Sun &middot; {{ r.fresh_in|signed }} fresh &middot; snow level {{ level(r.snow_level_weekend, r.area.elev_ft) }} ft</span></td>
 <td style="padding:6px 0;vertical-align:top;text-align:right;{{ border }}">{{ dots(r.weekend_condition.confidence) }}</td>
 </tr>
 {% endfor %}
@@ -58,7 +58,7 @@
 <tr><th style="{{ th }};padding-left:0">Area</th><th style="{{ th }}">Now</th><th style="{{ th }}">Weekend</th><th style="{{ th }}">Snow</th><th style="{{ th }};padding-right:0">Snow level (ft)</th></tr>
 {% for r in z.rows %}
 <tr>
-<td style="{{ td }};padding-left:0;white-space:normal"><b>{{ r.area.name }}</b><br><span style="font-size:11px;color:#888">{{ r.area.kind|capitalize }} &middot; {{ "{:,}".format(r.area.elev_ft) }} ft</span></td>
+<td style="{{ td }};padding-left:0;white-space:normal"><b>{{ r.area.name }}</b><br><span style="font-size:11px;color:#888">{{ r.area.kind|capitalize }} &middot; {{ "{:,}".format(r.area.elev_ft) }} ft{% if r.drive_s is not none %}<br>{{ r.drive_s|duration }} drive{% if r.drive_via %} to {{ r.drive_via }}{% endif %}{% endif %}</span></td>
 <td style="{{ td }};font-size:13px">{{ status(r.status) }}<br>{{ condition(r.score, r.condition) }}</td>
 <td style="{{ td }};font-size:13px">{{ status(r.weekend_status) }}<br>{{ condition(r.weekend_score, r.weekend_condition) }}</td>
 <td style="{{ td }};font-size:12px">{{ r.depth_in|inches }} deep<br><span style="color:#666">{{ r.new_7d_in|signed }} past wk{% if r.depth_change_in is not none %} ({{ r.depth_change_in|signed }}){% endif %}<br>{{ r.depth_change_by_sun_in|signed }} by Sun</span></td>
@@ -98,10 +98,12 @@
 
 <h2 style="font-size:14px;margin:30px 0 6px;padding-bottom:4px;border-bottom:1px solid #ccc">How to read this</h2>
 <p style="margin:4px 0;font-size:12px;color:#444">Condition: {{ badge(5) }} powder (6 in or more new in 3 days, no crust) &nbsp;{{ badge(4) }} packed or settled powder (new snow in 7 days, or groomed in 48 hours) &nbsp;{{ badge(3) }} packed, firm or spring corn &nbsp;{{ badge(2) }} thin cover, or crust from rain, freeze-thaw or wind &nbsp;{{ badge(1) }} too thin to ski.</p>
+<p style="margin:4px 0;font-size:12px;color:#444">Best bets rank open areas by snow depth on Sunday (counted up to 120 in) and fresh snow (the last 3 days plus forecast snowfall through Sunday, counted up to 24 in), weighted equally.</p>
 <p style="margin:4px 0;font-size:12px;color:#444">Skiable from {{ skiable_depth.backcountry }} in (backcountry), {{ skiable_depth.nordic }} in (nordic), {{ skiable_depth.downhill }} in (downhill). Below {{ good_depth.backcountry }} / {{ good_depth.nordic }} / {{ good_depth.downhill }} in the condition is capped at 2.</p>
 <p style="margin:4px 0;font-size:12px;color:#444">Confidence dots: {{ dots(80) }} 70% or more, {{ dots(50) }} 40-69%, {{ dots(20) }} under 40%; hover a meter for the exact number. Low-confidence conditions are drawn in gray. Weekend confidence drops when the NBM 10th-90th percentile precipitation range is wide, when the snow level is within 1,000 ft of the area, or when the NWS forecast disagrees with NBM.</p>
 <p style="margin:4px 0;font-size:12px;color:#444">Snow level: the elevation where rain turns to snow (NBM, lowest to highest over the period, in feet). ^ means it reaches above the area. Status for sno-parks and backcountry is inferred from snow depth and road status.</p>
-<p style="margin:4px 0;font-size:12px;color:#444">Sources: resort and grooming reports, NRCS SNOTEL, NOAA NOHRSC, NOAA National Blend of Models, NWS gridpoint forecasts, avalanche.org (NWAC, COAC), ODOT TripCheck, WSDOT, NPS.</p>
+{% if has_drive %}<p style="margin:4px 0;font-size:12px;color:#444">Drive times are from your base location in normal road conditions (OpenStreetMap routing); chains, closures and traffic can add time. Summits and the Muir Snowfield route to their winter access point.</p>
+{% endif %}<p style="margin:4px 0;font-size:12px;color:#444">Sources: resort and grooming reports, NRCS SNOTEL, NOAA NOHRSC, NOAA National Blend of Models, NWS gridpoint forecasts, avalanche.org (NWAC, COAC), ODOT TripCheck, WSDOT, NPS.</p>
 {% if errors %}<p style="margin:4px 0;font-size:12px;color:#a00">Unavailable this week: {{ errors|join(", ") }}.</p>{% endif %}
 
 </td></tr></table>

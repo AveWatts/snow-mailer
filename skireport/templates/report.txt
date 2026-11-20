@@ -2,14 +2,14 @@
 {% macro cond(score, r) %}{% if score %}{{ score }}/5 {{ r.value }} ({{ r.confidence }}%){% else %}Unknown{% endif %}{% endmacro %}
 CASCADES SKI REPORT
 {{ generated_local.strftime("%A, %B %-d, %Y") }}. Weekend: {{ weekend_start.strftime("%a %b %-d") }} - {{ weekend_end.strftime("%a %b %-d") }}.
-Forecast: NBM {{ nbm_run.strftime("%HZ %b %-d") if nbm_run else "unavailable" }}. Percentages are confidence in each value.
+Forecast: NBM {{ nbm_run.strftime("%HZ %b %-d") if nbm_run else "unavailable" }}. Percentages are confidence in each value. Fresh: new snow in the last 3 days plus forecast snowfall through Sunday.
 
 BEST BETS THIS WEEKEND
 {% for kind in ["backcountry", "nordic", "downhill"] %}
 {{ kind|capitalize }}:
 {% for r in best[kind] %}
   {{ r.weekend_score }}/5 {{ r.area.name }} - {{ r.weekend_condition.value }} ({{ r.weekend_condition.confidence }}%)
-       {{ r.area.zone.name }}; {{ r.depth_change_by_sun_in|signed }} by Sun; snow level {{ level(r.snow_level_weekend, r.area.elev_ft) }} ft
+       {{ r.area.zone.name }};{% if r.drive_s is not none %} {{ r.drive_s|duration }} drive;{% endif %} {{ r.projected_depth_in|inches }} deep Sun; {{ r.fresh_in|signed }} fresh; snow level {{ level(r.snow_level_weekend, r.area.elev_ft) }} ft
 {% else %}
   Nothing projected open.{% if kind == "downhill" %}{% for d, name in openings %} {{ name }} opens {{ d.strftime("%b %-d") }}.{% endfor %}{% endif %}
 
@@ -22,7 +22,7 @@ Avalanche: {% for v in z.avalanche %}{{ v.zone }} ({{ v.center_name }}): {{ v.ra
 
 
 {% for r in z.rows %}
-{{ r.area.name }} ({{ r.area.kind }}, {{ "{:,}".format(r.area.elev_ft) }} ft)
+{{ r.area.name }} ({{ r.area.kind }}, {{ "{:,}".format(r.area.elev_ft) }} ft{% if r.drive_s is not none %}, {{ r.drive_s|duration }} drive{% if r.drive_via %} to {{ r.drive_via }}{% endif %}{% endif %})
   Now:     {{ rated(r.status) }}; {{ cond(r.score, r.condition) }}
   Weekend: {{ rated(r.weekend_status) }}; {{ cond(r.weekend_score, r.weekend_condition) }}
   Snow:    {{ r.depth_in|inches }} deep, {{ r.new_7d_in|signed }} past week{% if r.depth_change_in is not none %} ({{ r.depth_change_in|signed }}){% endif %}, {{ r.depth_change_by_sun_in|signed }} by Sun
@@ -61,8 +61,10 @@ Webcams:
 
 HOW TO READ THIS
 Condition: 5 powder (6 in or more new in 3 days, no crust), 4 packed or settled powder (new snow in 7 days or groomed in 48 hours), 3 packed, firm or spring corn, 2 thin cover or crust (rain, freeze-thaw or wind since the last snow), 1 too thin to ski. Skiable from {{ skiable_depth.backcountry }} in backcountry, {{ skiable_depth.nordic }} in nordic, {{ skiable_depth.downhill }} in downhill; below {{ good_depth.backcountry }} / {{ good_depth.nordic }} / {{ good_depth.downhill }} in, condition is capped at 2.
+Best bets rank open areas by snow depth on Sunday (counted up to 120 in) and fresh snow (the last 3 days plus forecast snowfall through Sunday, counted up to 24 in), weighted equally.
 Snow level is the elevation where rain turns to snow (NBM, lowest to highest over the period). ^ means it reaches above the area.
 Status for sno-parks and backcountry is inferred from snow depth and road status. Weekend confidence drops when the NBM 10th-90th percentile precipitation range is wide, when the snow level is within 1,000 ft of the area, or when the NWS forecast disagrees with NBM.
-Sources: resort and grooming reports, NRCS SNOTEL, NOAA NOHRSC, NOAA National Blend of Models, NWS gridpoint forecasts, avalanche.org (NWAC, COAC), ODOT TripCheck, WSDOT, NPS.
+{% if has_drive %}Drive times are from your base location in normal road conditions (OpenStreetMap routing); chains, closures and traffic can add time. Summits and the Muir Snowfield route to their winter access point.
+{% endif %}Sources: resort and grooming reports, NRCS SNOTEL, NOAA NOHRSC, NOAA National Blend of Models, NWS gridpoint forecasts, avalanche.org (NWAC, COAC), ODOT TripCheck, WSDOT, NPS.
 {% if errors %}Unavailable this week: {{ errors|join(", ") }}.
 {% endif %}

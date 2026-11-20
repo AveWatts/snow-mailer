@@ -36,7 +36,14 @@ def level(rng, elev_ft):
     return text + ("^" if hi > elev_ft else "")
 
 
-ENV.filters.update(inches=inches, signed=signed, feet=feet)
+def duration(seconds):
+    if seconds is None:
+        return None
+    minutes = int(round(seconds / 300.0)) * 5
+    return f"{minutes // 60}h {minutes % 60:02d}m" if minutes >= 60 else f"{minutes}m"
+
+
+ENV.filters.update(inches=inches, signed=signed, feet=feet, duration=duration)
 ENV.globals.update(snow_level=snow_level, level=level)
 
 

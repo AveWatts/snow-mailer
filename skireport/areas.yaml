@@ -95,6 +95,7 @@ zones:
     lon: -121.6459
     elev_ft: 5711
     nws_grid: PQR/145,91
+    access_from: cooper-spur
   - id: hood-summit
     name: Mt Hood summit
     kind: backcountry
@@ -103,6 +104,7 @@ zones:
     elev_ft: 11249
     nws_grid: PQR/143,91
     permanent_snowfield: true
+    access_from: timberline
   webcams:
   - name: US26 at Govt Camp Lp Rd
     url: https://tripcheck.com/RoadCams/cams/US26%20at%20Govt%20Camp%20Lp%20Rd_pid1776.JPG
@@ -280,6 +282,7 @@ zones:
     elev_ft: 10497
     nws_grid: PQR/133,59
     permanent_snowfield: true
+    access_from: santiam-snopark
   - id: three-fingered-jack-summit
     name: Three Fingered Jack summit
     kind: backcountry
@@ -288,6 +291,7 @@ zones:
     elev_ft: 7841
     nws_grid: PQR/130,51
     permanent_snowfield: true
+    access_from: santiam-snopark
   - id: washington-summit
     name: Mt Washington summit
     kind: backcountry
@@ -296,6 +300,7 @@ zones:
     elev_ft: 7794
     nws_grid: PQR/129,44
     permanent_snowfield: true
+    access_from: santiam-snopark
   webcams:
   - name: US20 at Santiam Pass
     url: https://tripcheck.com/RoadCams/cams/Santiam%20Pass_pid2728.JPG
@@ -405,6 +410,7 @@ zones:
     elev_ft: 10085
     nws_grid: PDT/22,49
     permanent_snowfield: true
+    access_from: dutchman
   - id: middle-sister-summit
     name: Middle Sister summit
     kind: backcountry
@@ -413,6 +419,7 @@ zones:
     elev_ft: 10047
     nws_grid: PQR/129,35
     permanent_snowfield: true
+    access_from: dutchman
   - id: south-sister-summit
     name: South Sister summit
     kind: backcountry
@@ -421,6 +428,7 @@ zones:
     elev_ft: 10358
     nws_grid: PQR/129,33
     permanent_snowfield: true
+    access_from: dutchman
   webcams:
   - name: Century Drive at MP 21.11
     url: https://tripcheck.com/RoadCams/cams/Century%20Dr%20at%20MP%2021.11%20E_pid3545.JPG
@@ -517,7 +525,7 @@ zones:
     elev_ft: 5410
     nws_grid: MFR/135,103
   - id: hemlock-butte
-    name: Hemlock Butte
+    name: Hemlock Butte Cabin
     kind: nordic
     lat: 43.1325
     lon: -122.1944
@@ -599,6 +607,7 @@ zones:
     elev_ft: 12276
     nws_grid: PDT/49,141
     permanent_snowfield: true
+    access_from: smith-butte
   webcams:
   - name: USGS Red Mountain (Adams & St. Helens)
     url: https://volcview.wr.usgs.gov/ashcam-api/images/webcams/adams-REDMT/current.jpg
@@ -628,6 +637,7 @@ zones:
     elev_ft: 8363
     nws_grid: PQR/135,132
     permanent_snowfield: true
+    access_from: marble-mountain
   webcams:
   - name: USGS St. Helens Dome
     url: https://volcview.wr.usgs.gov/ashcam-api/images/webcams/msh-SUG/current.jpeg
@@ -661,6 +671,7 @@ zones:
     elev_ft: 8419
     nws_grid: SEW/136,28
     permanent_snowfield: true
+    access_from: paradise
   webcams:
   - name: Mt Rainier - Paradise
     url: https://www.nps.gov/webcams-mora/mountain.jpg

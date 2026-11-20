@@ -24,6 +24,7 @@ snowfall or rain-on-snow event is coming.
 | NWS gridpoint forecast | Cross-check on NBM snowfall and snow level (forecaster-edited); disagreement lowers confidence |
 | avalanche.org | NWAC / COAC danger ratings (quoted, never computed) |
 | ODOT TripCheck, WSDOT, NPS | Road closures and chain requirements |
+| OpenStreetMap (OSRM routing, Nominatim geocoding) | Drive time from `BASE_LOCATION`, normal road conditions |
 
 ## How scoring works
 
@@ -74,6 +75,7 @@ weights in `skireport/config.py` from that table.
    | `SMTP_USER` | the Gmail address that sends |
    | `SMTP_APP_PASSWORD` | the app password |
    | `REPORT_TO` | where the report goes (comma-separated for more than one) |
+   | `BASE_LOCATION` | optional: where you drive from, as `lat,lon` or a street address. Adds a drive time to every area. |
 
 4. Test it: Actions > ski-report > Run workflow, with "build without sending" checked. The rendered email is
    attached to the run as an artifact. Run it again unchecked to send a real one.
