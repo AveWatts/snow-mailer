@@ -1,7 +1,7 @@
 {
- "generated": "2026-11-20T18:47:35.909007+00:00",
+ "generated": "2026-11-20T20:20:29.577057+00:00",
  "weekend_start": "2026-11-21",
- "nbm_run": "2026-11-20T00:00:00+00:00",
+ "nbm_run": "2026-11-20T12:00:00+00:00",
  "errors": [],
  "areas": {
   "timberline": {
@@ -16,8 +16,8 @@
    "weekend_status_conf": 81,
    "weekend_score": 1,
    "weekend_condition": "Too thin",
-   "weekend_condition_conf": 73,
-   "projected_depth_in": 6.3
+   "weekend_condition_conf": 74,
+   "projected_depth_in": 5.8
   },
   "summit-pass": {
    "depth_in": 2.8,
@@ -31,8 +31,8 @@
    "weekend_status_conf": 81,
    "weekend_score": 1,
    "weekend_condition": "Too thin",
-   "weekend_condition_conf": 71,
-   "projected_depth_in": 4.0
+   "weekend_condition_conf": 73,
+   "projected_depth_in": 3.3
   },
   "meadows": {
    "depth_in": 6.3,
@@ -46,8 +46,8 @@
    "weekend_status_conf": 81,
    "weekend_score": 1,
    "weekend_condition": "Too thin",
-   "weekend_condition_conf": 73,
-   "projected_depth_in": 7.4
+   "weekend_condition_conf": 74,
+   "projected_depth_in": 7.0
   },
   "skibowl": {
    "depth_in": 2.0,
@@ -61,8 +61,8 @@
    "weekend_status_conf": 32,
    "weekend_score": 1,
    "weekend_condition": "Too thin",
-   "weekend_condition_conf": 71,
-   "projected_depth_in": 3.0
+   "weekend_condition_conf": 74,
+   "projected_depth_in": 2.4
   },
   "cooper-spur": {
    "depth_in": 0.0,
@@ -76,8 +76,8 @@
    "weekend_status_conf": 41,
    "weekend_score": 1,
    "weekend_condition": "No snow",
-   "weekend_condition_conf": 72,
-   "projected_depth_in": 0.6
+   "weekend_condition_conf": 75,
+   "projected_depth_in": 0.2
   },
   "meadows-nordic": {
    "depth_in": 4.3,
@@ -88,11 +88,11 @@
    "condition": "Too thin",
    "condition_conf": 73,
    "weekend_status": "Closed",
-   "weekend_status_conf": 67,
+   "weekend_status_conf": 68,
    "weekend_score": 1,
    "weekend_condition": "Too thin",
-   "weekend_condition_conf": 73,
-   "projected_depth_in": 5.2
+   "weekend_condition_conf": 74,
+   "projected_depth_in": 4.8
   },
   "teacup": {
    "depth_in": 3.5,
@@ -103,11 +103,11 @@
    "condition": "Too thin",
    "condition_conf": 71,
    "weekend_status": "Closed",
-   "weekend_status_conf": 67,
+   "weekend_status_conf": 68,
    "weekend_score": 1,
    "weekend_condition": "Too thin",
-   "weekend_condition_conf": 73,
-   "projected_depth_in": 4.5
+   "weekend_condition_conf": 74,
+   "projected_depth_in": 4.0
   },
   "trillium": {
    "depth_in": 2.0,
@@ -118,11 +118,11 @@
    "condition": "Too thin",
    "condition_conf": 74,
    "weekend_status": "Closed",
-   "weekend_status_conf": 65,
+   "weekend_status_conf": 67,
    "weekend_score": 1,
    "weekend_condition": "Too thin",
-   "weekend_condition_conf": 71,
-   "projected_depth_in": 3.0
+   "weekend_condition_conf": 73,
+   "projected_depth_in": 2.5
   },
   "white-river": {
    "depth_in": 3.1,
@@ -137,7 +137,7 @@
    "weekend_score": 1,
    "weekend_condition": "Too thin",
    "weekend_condition_conf": 73,
-   "projected_depth_in": 4.0
+   "projected_depth_in": 3.5
   },
   "glacier-view": {
    "depth_in": 2.0,
@@ -148,11 +148,11 @@
    "condition": "Too thin",
    "condition_conf": 69,
    "weekend_status": "Closed",
-   "weekend_status_conf": 65,
+   "weekend_status_conf": 68,
    "weekend_score": 1,
    "weekend_condition": "Too thin",
-   "weekend_condition_conf": 71,
-   "projected_depth_in": 3.0
+   "weekend_condition_conf": 74,
+   "projected_depth_in": 2.4
   },
   "barlow-pass": {
    "depth_in": 2.8,
@@ -167,7 +167,7 @@
    "weekend_score": 1,
    "weekend_condition": "Too thin",
    "weekend_condition_conf": 72,
-   "projected_depth_in": 3.8
+   "projected_depth_in": 3.2
   },
   "bennett-pass": {
    "depth_in": 3.5,
@@ -182,7 +182,7 @@
    "weekend_score": 1,
    "weekend_condition": "Too thin",
    "weekend_condition_conf": 73,
-   "projected_depth_in": 4.4
+   "projected_depth_in": 4.0
   },
   "tilly-jane": {
    "depth_in": 7.1,
@@ -193,11 +193,11 @@
    "condition": "Too thin",
    "condition_conf": 60,
    "weekend_status": "Closed",
-   "weekend_status_conf": 53,
+   "weekend_status_conf": 58,
    "weekend_score": 1,
    "weekend_condition": "Too thin",
-   "weekend_condition_conf": 57,
-   "projected_depth_in": 8.6
+   "weekend_condition_conf": 62,
+   "projected_depth_in": 8.0
   },
   "hood-summit": {
    "depth_in": 24.0,
@@ -208,11 +208,11 @@
    "condition": "Thin cover",
    "condition_conf": 30,
    "weekend_status": "Open",
-   "weekend_status_conf": 63,
+   "weekend_status_conf": 65,
    "weekend_score": 2,
    "weekend_condition": "Thin cover",
-   "weekend_condition_conf": 21,
-   "projected_depth_in": 25.9
+   "weekend_condition_conf": 24,
+   "projected_depth_in": 25.3
   },
   "hoodoo": {
    "depth_in": 2.4,
@@ -226,8 +226,8 @@
    "weekend_status_conf": 81,
    "weekend_score": 1,
    "weekend_condition": "Too thin",
-   "weekend_condition_conf": 71,
-   "projected_depth_in": 3.7
+   "weekend_condition_conf": 73,
+   "projected_depth_in": 3.2
   },
   "ray-benson": {
    "depth_in": 2.4,
@@ -238,11 +238,11 @@
    "condition": "Too thin",
    "condition_conf": 78,
    "weekend_status": "Closed",
-   "weekend_status_conf": 64,
+   "weekend_status_conf": 66,
    "weekend_score": 1,
    "weekend_condition": "Too thin",
-   "weekend_condition_conf": 71,
-   "projected_depth_in": 3.6
+   "weekend_condition_conf": 72,
+   "projected_depth_in": 3.2
   },
   "big-springs": {
    "depth_in": 0.0,
@@ -253,11 +253,11 @@
    "condition": "No snow",
    "condition_conf": 76,
    "weekend_status": "Closed",
-   "weekend_status_conf": 66,
+   "weekend_status_conf": 62,
    "weekend_score": 1,
    "weekend_condition": "No snow",
-   "weekend_condition_conf": 72,
-   "projected_depth_in": 0.8
+   "weekend_condition_conf": 69,
+   "projected_depth_in": 0.5
   },
   "maxwell-butte": {
    "depth_in": 0.0,
@@ -268,11 +268,11 @@
    "condition": "No snow",
    "condition_conf": 77,
    "weekend_status": "Closed",
-   "weekend_status_conf": 66,
+   "weekend_status_conf": 62,
    "weekend_score": 1,
    "weekend_condition": "No snow",
-   "weekend_condition_conf": 72,
-   "projected_depth_in": 0.8
+   "weekend_condition_conf": 69,
+   "projected_depth_in": 0.5
   },
   "lava-lake": {
    "depth_in": 0.0,
@@ -283,11 +283,11 @@
    "condition": "No snow",
    "condition_conf": 75,
    "weekend_status": "Closed",
-   "weekend_status_conf": 59,
+   "weekend_status_conf": 70,
    "weekend_score": 1,
    "weekend_condition": "No snow",
-   "weekend_condition_conf": 66,
-   "projected_depth_in": 0.7
+   "weekend_condition_conf": 76,
+   "projected_depth_in": 0.4
   },
   "santiam-snopark": {
    "depth_in": 2.8,
@@ -298,11 +298,11 @@
    "condition": "Too thin",
    "condition_conf": 78,
    "weekend_status": "Closed",
-   "weekend_status_conf": 65,
+   "weekend_status_conf": 67,
    "weekend_score": 1,
    "weekend_condition": "Too thin",
-   "weekend_condition_conf": 72,
-   "projected_depth_in": 3.9
+   "weekend_condition_conf": 73,
+   "projected_depth_in": 3.5
   },
   "potato-hill": {
    "depth_in": 1.2,
@@ -313,11 +313,11 @@
    "condition": "Too thin",
    "condition_conf": 78,
    "weekend_status": "Closed",
-   "weekend_status_conf": 64,
+   "weekend_status_conf": 68,
    "weekend_score": 1,
    "weekend_condition": "Too thin",
-   "weekend_condition_conf": 71,
-   "projected_depth_in": 2.5
+   "weekend_condition_conf": 74,
+   "projected_depth_in": 1.9
   },
   "echo-basin": {
    "depth_in": 0.8,
@@ -328,11 +328,11 @@
    "condition": "No snow",
    "condition_conf": 75,
    "weekend_status": "Closed",
-   "weekend_status_conf": 57,
+   "weekend_status_conf": 60,
    "weekend_score": 1,
    "weekend_condition": "Too thin",
-   "weekend_condition_conf": 64,
-   "projected_depth_in": 2.3
+   "weekend_condition_conf": 67,
+   "projected_depth_in": 1.7
   },
   "tombstone": {
    "depth_in": 1.6,
@@ -343,11 +343,11 @@
    "condition": "Too thin",
    "condition_conf": 76,
    "weekend_status": "Closed",
-   "weekend_status_conf": 63,
+   "weekend_status_conf": 68,
    "weekend_score": 1,
    "weekend_condition": "Too thin",
-   "weekend_condition_conf": 69,
-   "projected_depth_in": 3.1
+   "weekend_condition_conf": 74,
+   "projected_depth_in": 2.5
   },
   "jefferson-summit": {
    "depth_in": 18.9,
@@ -358,11 +358,11 @@
    "condition": "Crust / ice",
    "condition_conf": 30,
    "weekend_status": "Open",
-   "weekend_status_conf": 62,
+   "weekend_status_conf": 66,
    "weekend_score": 2,
    "weekend_condition": "Thin cover",
-   "weekend_condition_conf": 20,
-   "projected_depth_in": 20.9
+   "weekend_condition_conf": 25,
+   "projected_depth_in": 19.9
   },
   "three-fingered-jack-summit": {
    "depth_in": 10.6,
@@ -372,12 +372,12 @@
    "score": 1,
    "condition": "Too thin",
    "condition_conf": 46,
-   "weekend_status": "Open",
-   "weekend_status_conf": 38,
-   "weekend_score": 2,
-   "weekend_condition": "Thin cover",
-   "weekend_condition_conf": 25,
-   "projected_depth_in": 12.4
+   "weekend_status": "Closed",
+   "weekend_status_conf": 40,
+   "weekend_score": 1,
+   "weekend_condition": "Too thin",
+   "weekend_condition_conf": 42,
+   "projected_depth_in": 11.6
   },
   "washington-summit": {
    "depth_in": 7.9,
@@ -388,11 +388,11 @@
    "condition": "Too thin",
    "condition_conf": 59,
    "weekend_status": "Closed",
-   "weekend_status_conf": 47,
+   "weekend_status_conf": 51,
    "weekend_score": 1,
    "weekend_condition": "Too thin",
-   "weekend_condition_conf": 51,
-   "projected_depth_in": 9.7
+   "weekend_condition_conf": 55,
+   "projected_depth_in": 9.0
   },
   "bachelor": {
    "depth_in": 6,
@@ -406,8 +406,8 @@
    "weekend_status_conf": 81,
    "weekend_score": 1,
    "weekend_condition": "Too thin",
-   "weekend_condition_conf": 72,
-   "projected_depth_in": 7.0
+   "weekend_condition_conf": 71,
+   "projected_depth_in": 6.8
   },
   "bachelor-nordic": {
    "depth_in": 8.7,
@@ -422,7 +422,7 @@
    "weekend_score": 1,
    "weekend_condition": "Too thin",
    "weekend_condition_conf": 52,
-   "projected_depth_in": 9.7
+   "projected_depth_in": 9.5
   },
   "swampy": {
    "depth_in": 4.3,
@@ -433,11 +433,11 @@
    "condition": "Too thin",
    "condition_conf": 68,
    "weekend_status": "Closed",
-   "weekend_status_conf": 68,
+   "weekend_status_conf": 66,
    "weekend_score": 1,
    "weekend_condition": "Too thin",
-   "weekend_condition_conf": 73,
-   "projected_depth_in": 5.0
+   "weekend_condition_conf": 71,
+   "projected_depth_in": 4.7
   },
   "meissner": {
    "depth_in": 1.2,
@@ -448,11 +448,11 @@
    "condition": "Too thin",
    "condition_conf": 71,
    "weekend_status": "Closed",
-   "weekend_status_conf": 69,
+   "weekend_status_conf": 66,
    "weekend_score": 1,
    "weekend_condition": "Too thin",
-   "weekend_condition_conf": 75,
-   "projected_depth_in": 1.7
+   "weekend_condition_conf": 72,
+   "projected_depth_in": 1.5
   },
   "elk-lake": {
    "depth_in": 2.8,
@@ -463,11 +463,11 @@
    "condition": "Too thin",
    "condition_conf": 71,
    "weekend_status": "Closed",
-   "weekend_status_conf": 65,
+   "weekend_status_conf": 66,
    "weekend_score": 1,
    "weekend_condition": "Too thin",
-   "weekend_condition_conf": 71,
-   "projected_depth_in": 4.1
+   "weekend_condition_conf": 72,
+   "projected_depth_in": 3.7
   },
   "dutchman": {
    "depth_in": 8.7,
@@ -482,7 +482,7 @@
    "weekend_score": 1,
    "weekend_condition": "Too thin",
    "weekend_condition_conf": 52,
-   "projected_depth_in": 9.7
+   "projected_depth_in": 9.5
   },
   "three-creek-upper": {
    "depth_in": 1.2,
@@ -493,11 +493,11 @@
    "condition": "Too thin",
    "condition_conf": 75,
    "weekend_status": "Closed",
-   "weekend_status_conf": 67,
+   "weekend_status_conf": 70,
    "weekend_score": 1,
    "weekend_condition": "Too thin",
-   "weekend_condition_conf": 73,
-   "projected_depth_in": 1.6
+   "weekend_condition_conf": 76,
+   "projected_depth_in": 1.5
   },
   "three-creek-lower": {
    "depth_in": 0.4,
@@ -508,11 +508,11 @@
    "condition": "No snow",
    "condition_conf": 75,
    "weekend_status": "Closed",
-   "weekend_status_conf": 67,
+   "weekend_status_conf": 70,
    "weekend_score": 1,
    "weekend_condition": "No snow",
-   "weekend_condition_conf": 73,
-   "projected_depth_in": 0.8
+   "weekend_condition_conf": 76,
+   "projected_depth_in": 0.7
   },
   "tam-mcarthur": {
    "depth_in": 9.1,
@@ -523,11 +523,11 @@
    "condition": "Too thin",
    "condition_conf": 51,
    "weekend_status": "Closed",
-   "weekend_status_conf": 47,
+   "weekend_status_conf": 50,
    "weekend_score": 1,
    "weekend_condition": "Too thin",
-   "weekend_condition_conf": 50,
-   "projected_depth_in": 9.9
+   "weekend_condition_conf": 52,
+   "projected_depth_in": 9.8
   },
   "north-sister-summit": {
    "depth_in": 19.7,
@@ -538,11 +538,11 @@
    "condition": "Crust / ice",
    "condition_conf": 30,
    "weekend_status": "Open",
-   "weekend_status_conf": 62,
+   "weekend_status_conf": 63,
    "weekend_score": 2,
    "weekend_condition": "Thin cover",
-   "weekend_condition_conf": 20,
-   "projected_depth_in": 21.6
+   "weekend_condition_conf": 21,
+   "projected_depth_in": 21.1
   },
   "middle-sister-summit": {
    "depth_in": 20.5,
@@ -553,11 +553,11 @@
    "condition": "Crust / ice",
    "condition_conf": 30,
    "weekend_status": "Open",
-   "weekend_status_conf": 62,
+   "weekend_status_conf": 63,
    "weekend_score": 2,
    "weekend_condition": "Thin cover",
-   "weekend_condition_conf": 20,
-   "projected_depth_in": 22.8
+   "weekend_condition_conf": 21,
+   "projected_depth_in": 22.6
   },
   "south-sister-summit": {
    "depth_in": 21.3,
@@ -571,7 +571,7 @@
    "weekend_status_conf": 63,
    "weekend_score": 2,
    "weekend_condition": "Thin cover",
-   "weekend_condition_conf": 20,
+   "weekend_condition_conf": 21,
    "projected_depth_in": 23.2
   },
   "willamette-pass": {
@@ -585,9 +585,9 @@
    "weekend_status": "Closed",
    "weekend_status_conf": 69,
    "weekend_score": 1,
-   "weekend_condition": "Too thin",
-   "weekend_condition_conf": 73,
-   "projected_depth_in": 1.1
+   "weekend_condition": "No snow",
+   "weekend_condition_conf": 74,
+   "projected_depth_in": 0.7
   },
   "gold-lake": {
    "depth_in": 4.3,
@@ -602,7 +602,7 @@
    "weekend_score": 1,
    "weekend_condition": "Too thin",
    "weekend_condition_conf": 73,
-   "projected_depth_in": 5.4
+   "projected_depth_in": 5.1
   },
   "waldo": {
    "depth_in": 1.6,
@@ -613,11 +613,11 @@
    "condition": "Too thin",
    "condition_conf": 77,
    "weekend_status": "Closed",
-   "weekend_status_conf": 67,
+   "weekend_status_conf": 66,
    "weekend_score": 1,
    "weekend_condition": "Too thin",
    "weekend_condition_conf": 73,
-   "projected_depth_in": 2.7
+   "projected_depth_in": 2.5
   },
   "salt-creek": {
    "depth_in": 1.6,
@@ -628,11 +628,11 @@
    "condition": "Too thin",
    "condition_conf": 78,
    "weekend_status": "Closed",
-   "weekend_status_conf": 68,
+   "weekend_status_conf": 66,
    "weekend_score": 1,
    "weekend_condition": "Too thin",
-   "weekend_condition_conf": 74,
-   "projected_depth_in": 2.7
+   "weekend_condition_conf": 73,
+   "projected_depth_in": 2.5
   },
   "three-lakes": {
    "depth_in": 8.3,
@@ -643,11 +643,11 @@
    "condition": "Too thin",
    "condition_conf": 56,
    "weekend_status": "Closed",
-   "weekend_status_conf": 44,
+   "weekend_status_conf": 46,
    "weekend_score": 1,
    "weekend_condition": "Too thin",
-   "weekend_condition_conf": 47,
-   "projected_depth_in": 10.6
+   "weekend_condition_conf": 49,
+   "projected_depth_in": 10.2
   },
   "hemlock-butte": {
    "depth_in": 10.6,
@@ -673,11 +673,11 @@
    "condition": "Thin cover",
    "condition_conf": 34,
    "weekend_status": "Open",
-   "weekend_status_conf": 64,
+   "weekend_status_conf": 65,
    "weekend_score": 2,
    "weekend_condition": "Thin cover",
-   "weekend_condition_conf": 24,
-   "projected_depth_in": 19.3
+   "weekend_condition_conf": 26,
+   "projected_depth_in": 19.2
   },
   "marys-peak": {
    "depth_in": 0.0,
@@ -688,10 +688,10 @@
    "condition": "No snow",
    "condition_conf": 69,
    "weekend_status": "Closed",
-   "weekend_status_conf": 60,
+   "weekend_status_conf": 57,
    "weekend_score": 1,
    "weekend_condition": "No snow",
-   "weekend_condition_conf": 67,
+   "weekend_condition_conf": 64,
    "projected_depth_in": 0.0
   },
   "pineside": {
@@ -703,11 +703,11 @@
    "condition": "Too thin",
    "condition_conf": 69,
    "weekend_status": "Closed",
-   "weekend_status_conf": 57,
+   "weekend_status_conf": 60,
    "weekend_score": 1,
    "weekend_condition": "Too thin",
-   "weekend_condition_conf": 64,
-   "projected_depth_in": 2.1
+   "weekend_condition_conf": 67,
+   "projected_depth_in": 1.9
   },
   "snowking": {
    "depth_in": 4.3,
@@ -718,11 +718,11 @@
    "condition": "Too thin",
    "condition_conf": 70,
    "weekend_status": "Closed",
-   "weekend_status_conf": 57,
+   "weekend_status_conf": 60,
    "weekend_score": 1,
    "weekend_condition": "Too thin",
-   "weekend_condition_conf": 64,
-   "projected_depth_in": 5.5
+   "weekend_condition_conf": 66,
+   "projected_depth_in": 5.2
   },
   "smith-butte": {
    "depth_in": 5.1,
@@ -733,11 +733,11 @@
    "condition": "Too thin",
    "condition_conf": 69,
    "weekend_status": "Closed",
-   "weekend_status_conf": 57,
+   "weekend_status_conf": 63,
    "weekend_score": 1,
    "weekend_condition": "Too thin",
-   "weekend_condition_conf": 63,
-   "projected_depth_in": 6.9
+   "weekend_condition_conf": 69,
+   "projected_depth_in": 6.4
   },
   "adams-summit": {
    "depth_in": 300,
@@ -748,11 +748,11 @@
    "condition": "Settled powder",
    "condition_conf": 30,
    "weekend_status": "Open",
-   "weekend_status_conf": 63,
+   "weekend_status_conf": 62,
    "weekend_score": 4,
    "weekend_condition": "Settled powder",
-   "weekend_condition_conf": 21,
-   "projected_depth_in": 302.5
+   "weekend_condition_conf": 20,
+   "projected_depth_in": 301.5
   },
   "marble-mountain": {
    "depth_in": 0.0,
@@ -767,7 +767,7 @@
    "weekend_score": 1,
    "weekend_condition": "Too thin",
    "weekend_condition_conf": 65,
-   "projected_depth_in": 1.8
+   "projected_depth_in": 1.5
   },
   "helens-summit": {
    "depth_in": 24.4,
@@ -778,11 +778,11 @@
    "condition": "Crust / ice",
    "condition_conf": 30,
    "weekend_status": "Open",
-   "weekend_status_conf": 64,
+   "weekend_status_conf": 62,
    "weekend_score": 2,
    "weekend_condition": "Thin cover",
-   "weekend_condition_conf": 23,
-   "projected_depth_in": 28.8
+   "weekend_condition_conf": 20,
+   "projected_depth_in": 29.9
   },
   "paradise": {
    "depth_in": 15.0,
@@ -793,11 +793,11 @@
    "condition": "Thin cover",
    "condition_conf": 28,
    "weekend_status": "Open",
-   "weekend_status_conf": 59,
+   "weekend_status_conf": 54,
    "weekend_score": 2,
    "weekend_condition": "Thin cover",
-   "weekend_condition_conf": 20,
-   "projected_depth_in": 17.1
+   "weekend_condition_conf": 14,
+   "projected_depth_in": 16.8
   },
   "muir-snowfield": {
    "depth_in": 217.3,
@@ -808,11 +808,11 @@
    "condition": "Settled powder",
    "condition_conf": 30,
    "weekend_status": "Open",
-   "weekend_status_conf": 62,
-   "weekend_score": 4,
-   "weekend_condition": "Settled powder",
-   "weekend_condition_conf": 20,
-   "projected_depth_in": 220.2
+   "weekend_status_conf": 60,
+   "weekend_score": 5,
+   "weekend_condition": "Powder",
+   "weekend_condition_conf": 16,
+   "projected_depth_in": 220.9
   }
  }
 }
