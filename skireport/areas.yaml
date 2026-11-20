@@ -1,0 +1,672 @@
+zones:
+- id: mt-hood
+  name: Mt Hood
+  state: OR
+  road_link: https://www.tripcheck.com/Pages/Mountain-Passes/mt-hood
+  areas:
+  - id: timberline
+    name: Timberline
+    kind: downhill
+    lat: 45.33104
+    lon: -121.71113
+    elev_ft: 5940
+    nws_grid: PQR/142,89
+  - id: summit-pass
+    name: Summit Pass
+    kind: downhill
+    lat: 45.3031
+    lon: -121.7459
+    elev_ft: 3977
+    nws_grid: PQR/141,88
+  - id: meadows
+    name: Mt Hood Meadows
+    kind: downhill
+    lat: 45.3318
+    lon: -121.6654
+    elev_ft: 5383
+    nws_grid: PQR/144,88
+  - id: skibowl
+    name: Mt Hood Skibowl
+    kind: downhill
+    lat: 45.301
+    lon: -121.774
+    elev_ft: 3642
+    nws_grid: PQR/140,88
+  - id: cooper-spur
+    name: Cooper Spur
+    kind: downhill
+    lat: 45.4253
+    lon: -121.5925
+    elev_ft: 3417
+    nws_grid: PQR/147,92
+  - id: meadows-nordic
+    name: Meadows Nordic Center
+    kind: nordic
+    lat: 45.32552
+    lon: -121.63463
+    elev_ft: 4530
+    nws_grid: PQR/145,88
+  - id: teacup
+    name: Teacup Lake
+    kind: nordic
+    lat: 45.3205
+    lon: -121.6192
+    elev_ft: 4282
+    nws_grid: PQR/145,88
+  - id: trillium
+    name: Trillium Lake
+    kind: nordic
+    lat: 45.2852
+    lon: -121.728
+    elev_ft: 3794
+    nws_grid: PQR/141,87
+  - id: white-river
+    name: White River West
+    kind: backcountry
+    lat: 45.3037
+    lon: -121.6742
+    elev_ft: 4281
+    nws_grid: PQR/143,87
+  - id: glacier-view
+    name: Glacier View
+    kind: backcountry
+    lat: 45.3052
+    lon: -121.7794
+    elev_ft: 3626
+    nws_grid: PQR/140,88
+  - id: barlow-pass
+    name: Barlow Pass
+    kind: backcountry
+    lat: 45.2825
+    lon: -121.6855
+    elev_ft: 4158
+    nws_grid: PQR/143,86
+  - id: bennett-pass
+    name: Bennett Pass
+    kind: backcountry
+    lat: 45.3102
+    lon: -121.6418
+    elev_ft: 4681
+    nws_grid: PQR/144,87
+  - id: tilly-jane
+    name: Tilly Jane / Cloud Cap
+    kind: backcountry
+    lat: 45.399
+    lon: -121.6459
+    elev_ft: 5711
+    nws_grid: PQR/145,91
+  - id: hood-summit
+    name: Mt Hood summit
+    kind: backcountry
+    lat: 45.37362
+    lon: -121.696
+    elev_ft: 11249
+    nws_grid: PQR/143,91
+    permanent_snowfield: true
+  webcams:
+  - name: US26 at Govt Camp Lp Rd
+    url: https://tripcheck.com/RoadCams/cams/US26%20at%20Govt%20Camp%20Lp%20Rd_pid1776.JPG
+    group: Road
+    short: Govt Camp Loop Rd
+  - name: US26 at Ski Bowl West
+    url: https://tripcheck.com/RoadCams/cams/US26%20at%20Ski%20Bowl%20West%20EB_pid4117.jpg
+    group: Road
+    short: Ski Bowl West
+  - name: US26 at West of Mirror Lake Trailhead
+    url: https://tripcheck.com/RoadCams/cams/US26%20at%20West%20of%20Mirror%20Lake%20Trailhead%20WB_pid4113.jpg
+    group: Road
+    short: Mirror Lake
+  - name: US26 at Government Camp
+    url: https://tripcheck.com/RoadCams/cams/GovernmentCamp_pid624.jpg
+    group: Road
+    short: Government Camp
+  - name: US26 at Government Camp Maint
+    url: https://tripcheck.com/RoadCams/cams/US26%20at%20Govn%20Camp%20Maint_pid1899.JPG
+    group: Road
+    short: Govt Camp Maint
+  - name: US26 at Trillium Lake
+    url: https://tripcheck.com/RoadCams/cams/US26%20at%20Trillium%20Lake%20EB_pid1887.JPG
+    group: Road
+    short: Trillium Lake
+  - name: US26 at Hwy35
+    url: https://tripcheck.com/RoadCams/cams/US26%20at%20Hwy35_pid1881.JPG
+    group: Road
+    short: Hwy 35
+  - name: US26 at Frog Lake
+    url: https://tripcheck.com/RoadCams/cams/US26%20at%20Frog%20Lake%20VMS_pid1773.JPG
+    group: Road
+    short: Frog Lake
+  - name: US26 at Blue Box Pass Summit
+    url: https://tripcheck.com/RoadCams/cams/Blue%20Box%20Pass_pid1919.JPG
+    group: Road
+    short: Blue Box Pass
+  - name: OR35 at Meadows Dr
+    url: https://tripcheck.com/RoadCams/cams/ORE35%20at%20Meadows%20Dr%20SB_pid3874.jpg
+    group: Road
+    short: Meadows Dr
+  - name: Timberline Lodge
+    url: https://timberlinelodge.com/snowcameras/lodge.jpg
+    group: Timberline
+    short: Lodge
+  - name: Timberline - Jeff Flood
+    url: https://timberlinelodge.com/snowcameras/FloodEast.jpg
+    group: Timberline
+    short: Jeff Flood
+  - name: Timberline - Palmer / Silcox
+    url: https://timberlinelodge.com/snowcameras/palmerbottom.jpg
+    group: Timberline
+    short: Palmer / Silcox
+  - name: Summit Pass (Timberline)
+    url: https://timberlinelodge.com/snowcameras/summit.jpg
+    group: Timberline
+    short: Summit Pass
+  - name: Mt Hood Meadows - Base
+    url: https://api.wetmet.net/widgets/stream/frame.php?uid=072e3c1a6016174851619e4180909d3d
+    group: Meadows
+    short: Base
+  - name: Mt Hood Meadows - Bottom of Vista
+    url: https://api.wetmet.net/widgets/stream/frame.php?uid=1be5f08dfca10d15d5e4ec9627c17c7c
+    group: Meadows
+    short: Bottom of Vista
+  - name: Mt Hood Meadows - Top of Vista
+    url: https://api.wetmet.net/widgets/stream/frame.php?uid=eec27f8164fc1105656ea4d46df4cd37
+    group: Meadows
+    short: Top of Vista
+  - name: Mt Hood Meadows - Top of Blue
+    url: https://api.wetmet.net/widgets/stream/frame.php?uid=c878c340832e23aab90526673b71cc17
+    group: Meadows
+    short: Top of Blue
+  - name: Mt Hood Meadows - Top of Cascade
+    url: https://api.wetmet.net/widgets/stream/frame.php?uid=27a40badfb43d1ee5f6e18ff23d1545d
+    group: Meadows
+    short: Top of Cascade
+  - name: Mt Hood Meadows - Top of Heather
+    url: https://api.wetmet.net/widgets/stream/frame.php?uid=05d8cf6ff60357a37c6f97318ad3ea8d
+    group: Meadows
+    short: Top of Heather
+  - name: Mt Hood Meadows Nordic
+    url: https://api.wetmet.net/widgets/stream/frame.php?uid=1d84bd2e0e9b83af2a1c6b8dd5474f95
+    group: Meadows
+    short: Nordic
+  - name: Skibowl West
+    url: https://video.nest.com/embedded/live/SUFOrgWa6m
+    group: Skibowl
+    short: West
+  - name: Skibowl Upper Bowl
+    url: https://video.nest.com/embedded/live/npsFa2hlJU
+    group: Skibowl
+    short: Upper Bowl
+  - name: Skibowl East
+    url: https://vauth.command.verkada.com/__v/mt-hood-ski-bowl/embed/html/b38d0548-ebd5-4fc4-8821-d73e59dd2067/
+    group: Skibowl
+    short: East
+  - name: Government Camp (SkylineWebcams)
+    url: https://www.skylinewebcams.com/webcam/united-states/oregon/government-camp/government-camp.html
+    group: Other
+    short: Government Camp
+- id: santiam
+  name: Santiam Pass
+  state: OR
+  road_link: https://www.tripcheck.com/Pages/Mountain-Passes/santiam-pass
+  areas:
+  - id: hoodoo
+    name: Hoodoo
+    kind: downhill
+    lat: 44.40896
+    lon: -121.87178
+    elev_ft: 4683
+    nws_grid: PQR/128,48
+  - id: ray-benson
+    name: Ray Benson
+    kind: nordic
+    lat: 44.4054
+    lon: -121.8621
+    elev_ft: 4776
+    nws_grid: PQR/129,47
+  - id: big-springs
+    name: Big Springs
+    kind: nordic
+    lat: 44.4613
+    lon: -121.9804
+    elev_ft: 3697
+    nws_grid: PQR/125,51
+  - id: maxwell-butte
+    name: Maxwell Butte
+    kind: nordic
+    lat: 44.4608
+    lon: -121.9771
+    elev_ft: 3701
+    nws_grid: PQR/125,51
+  - id: lava-lake
+    name: Lava Lake
+    kind: nordic
+    lat: 44.41668
+    lon: -122.01174
+    elev_ft: 3471
+    nws_grid: PQR/124,49
+  - id: santiam-snopark
+    name: Santiam Sno-Park
+    kind: backcountry
+    lat: 44.4224
+    lon: -121.8611
+    elev_ft: 4758
+    nws_grid: PQR/129,48
+  - id: potato-hill
+    name: Potato Hill
+    kind: backcountry
+    lat: 44.42887
+    lon: -121.92257
+    elev_ft: 4054
+    nws_grid: PQR/127,49
+  - id: echo-basin
+    name: Echo Basin
+    kind: backcountry
+    lat: 44.40187
+    lon: -122.08779
+    elev_ft: 3497
+    nws_grid: PQR/121,49
+  - id: tombstone
+    name: Tombstone Pass
+    kind: backcountry
+    lat: 44.39565
+    lon: -122.1412
+    elev_ft: 4221
+    nws_grid: PQR/120,49
+  - id: jefferson-summit
+    name: Mt Jefferson summit
+    kind: backcountry
+    lat: 44.67431
+    lon: -121.79962
+    elev_ft: 10497
+    nws_grid: PQR/133,59
+    permanent_snowfield: true
+  - id: three-fingered-jack-summit
+    name: Three Fingered Jack summit
+    kind: backcountry
+    lat: 44.479
+    lon: -121.84319
+    elev_ft: 7841
+    nws_grid: PQR/130,51
+    permanent_snowfield: true
+  - id: washington-summit
+    name: Mt Washington summit
+    kind: backcountry
+    lat: 44.33222
+    lon: -121.83819
+    elev_ft: 7794
+    nws_grid: PQR/129,44
+    permanent_snowfield: true
+  webcams:
+  - name: US20 at Santiam Pass
+    url: https://tripcheck.com/RoadCams/cams/Santiam%20Pass_pid2728.JPG
+    group: Road
+    short: Santiam Pass
+  - name: US20 at Santiam Jct
+    url: https://tripcheck.com/RoadCams/cams/US20%20at%20Santiam%20Jct_pid1675.JPG
+    group: Road
+    short: Santiam Jct
+  - name: US20 at Tombstone
+    url: https://tripcheck.com/RoadCams/cams/US20atTombstone_pid1354.jpg
+    group: Road
+    short: Tombstone
+  - name: Hoodoo - Base
+    url: https://santiampsp.org/wx/weather16.jpg
+    group: Hoodoo
+    short: Base
+  - name: Hoodoo - Top of Manzanita
+    url: https://santiampsp.org/wx/weather3.jpg
+    group: Hoodoo
+    short: Top of Manzanita
+  - name: Hoodoo - Top of Ed
+    url: https://santiampsp.org/wx/weather2.jpg
+    group: Hoodoo
+    short: Top of Ed
+  - name: Hoodoo - Top of Easy Rider
+    url: https://santiampsp.org/wx/weather4.jpg
+    group: Hoodoo
+    short: Top of Easy Rider
+  - name: Hoodoo - Summit
+    url: https://santiampsp.org/wx/weather1.jpg
+    group: Hoodoo
+    short: Summit
+- id: bend
+  name: Bend / Bachelor
+  state: OR
+  road_link: https://www.tripcheck.com/
+  areas:
+  - id: bachelor
+    name: Mt Bachelor
+    kind: downhill
+    lat: 44.00266
+    lon: -121.6784
+    elev_ft: 6374
+    nws_grid: PDT/23,41
+  - id: bachelor-nordic
+    name: Mt Bachelor Nordic
+    kind: nordic
+    lat: 44.00523
+    lon: -121.67812
+    elev_ft: 6325
+    nws_grid: PDT/23,41
+  - id: swampy
+    name: Swampy Lakes
+    kind: nordic
+    lat: 43.9889
+    lon: -121.5682
+    elev_ft: 5806
+    nws_grid: PDT/27,39
+  - id: meissner
+    name: Virginia Meissner
+    kind: nordic
+    lat: 43.9845
+    lon: -121.5263
+    elev_ft: 5392
+    nws_grid: PDT/28,39
+  - id: elk-lake
+    name: Elk Lake
+    kind: nordic
+    lat: 43.9806
+    lon: -121.806
+    elev_ft: 4905
+    nws_grid: PDT/19,41
+  - id: dutchman
+    name: Dutchman Flat
+    kind: backcountry
+    lat: 43.9998
+    lon: -121.664
+    elev_ft: 6350
+    nws_grid: PDT/24,40
+  - id: three-creek-upper
+    name: Upper Three Creek
+    kind: backcountry
+    lat: 44.1601
+    lon: -121.6368
+    elev_ft: 5159
+    nws_grid: PDT/26,48
+  - id: three-creek-lower
+    name: Lower Three Creek
+    kind: backcountry
+    lat: 44.178
+    lon: -121.6225
+    elev_ft: 4818
+    nws_grid: PDT/26,48
+  - id: tam-mcarthur
+    name: Tam McArthur Rim
+    kind: backcountry
+    lat: 44.0948
+    lon: -121.62436
+    elev_ft: 6556
+    nws_grid: PDT/26,45
+  - id: north-sister-summit
+    name: North Sister summit
+    kind: backcountry
+    lat: 44.16632
+    lon: -121.77044
+    elev_ft: 10085
+    nws_grid: PDT/22,49
+    permanent_snowfield: true
+  - id: middle-sister-summit
+    name: Middle Sister summit
+    kind: backcountry
+    lat: 44.14838
+    lon: -121.78358
+    elev_ft: 10047
+    nws_grid: PQR/129,35
+    permanent_snowfield: true
+  - id: south-sister-summit
+    name: South Sister summit
+    kind: backcountry
+    lat: 44.1035
+    lon: -121.76933
+    elev_ft: 10358
+    nws_grid: PQR/129,33
+    permanent_snowfield: true
+  webcams:
+  - name: Century Drive at MP 21.11
+    url: https://tripcheck.com/RoadCams/cams/Century%20Dr%20at%20MP%2021.11%20E_pid3545.JPG
+    group: Road
+    short: Century Dr MP 21
+  - name: Mt Bachelor - West Village
+    url: https://api.mtbachelor.com/api/v1/cams/mtn/1
+    group: Bachelor
+    short: West Village
+  - name: Mt Bachelor Nordic Center
+    url: https://api.mtbachelor.com/api/v1/cams/mtn/16
+    group: Bachelor
+    short: Nordic Center
+  - name: Mt Bachelor - Pine Marten Lodge
+    url: https://api.mtbachelor.com/api/v1/cams/mtn/9
+    group: Bachelor
+    short: Pine Marten Lodge
+  - name: Mt Bachelor - Outback
+    url: https://api.mtbachelor.com/api/v1/cams/mtn/11
+    group: Bachelor
+    short: Outback
+  - name: Mt Bachelor - Sunrise Base
+    url: https://api.mtbachelor.com/api/v1/cams/mtn/5
+    group: Bachelor
+    short: Sunrise Base
+  - name: Mt Bachelor - Top of Sunrise
+    url: https://www.youtube.com/watch?v=pXHMtXbmo7k
+    group: Bachelor
+    short: Top of Sunrise
+  - name: Mt Bachelor - Top of Cloudchaser
+    url: https://camstreamer.com/embed/7WfyGuaHvti06WYRCx5L1XdgpKWyxHqN0iaDpKR4
+    group: Bachelor
+    short: Top of Cloudchaser
+- id: willamette
+  name: Willamette Pass
+  state: OR
+  road_link: https://www.tripcheck.com/Pages/Mountain-Passes/willamette-pass
+  areas:
+  - id: willamette-pass
+    name: Willamette Pass Resort
+    kind: downhill
+    lat: 43.60066
+    lon: -122.0354
+    elev_ft: 5140
+    nws_grid: MFR/145,125
+  - id: gold-lake
+    name: Gold Lake
+    kind: nordic
+    lat: 43.6042
+    lon: -122.0457
+    elev_ft: 4988
+    nws_grid: PQR/115,12
+  - id: waldo
+    name: Waldo
+    kind: backcountry
+    lat: 43.6183
+    lon: -122.0813
+    elev_ft: 4440
+    nws_grid: PQR/114,13
+  - id: salt-creek
+    name: Salt Creek
+    kind: backcountry
+    lat: 43.6082
+    lon: -122.1181
+    elev_ft: 4169
+    nws_grid: PQR/113,13
+  webcams:
+  - name: OR58 at Willamette Pass
+    url: https://tripcheck.com/RoadCams/cams/WillamettePass_pid658.jpg
+    group: Road
+    short: Willamette Pass
+  - name: OR58 at Salt Creek Tunnel
+    url: https://tripcheck.com/RoadCams/cams/ORE58%20at%20Salt%20Creek%20Tunnel%20WB_pid3021.JPG
+    group: Road
+    short: Salt Creek Tunnel
+  - name: Willamette Pass Resort - Base
+    url: https://www.youtube.com/watch?v=sNVA6oC7vcM
+    group: Willamette Pass
+    short: Base
+  - name: Willamette Pass Resort - Eagle Peak
+    url: https://camstreamer.com/embed/0olR6wKOETdtAXviNpWTJIRmKR1ecw65QkCTYyhe
+    group: Willamette Pass
+    short: Eagle Peak
+- id: diamond
+  name: Diamond Lake / Crater Lake
+  state: OR
+  road_link: https://www.tripcheck.com/Pages/Mountain-Passes/diamond-lake
+  areas:
+  - id: three-lakes
+    name: Three Lakes
+    kind: nordic
+    lat: 43.1075
+    lon: -122.1854
+    elev_ft: 5410
+    nws_grid: MFR/135,103
+  - id: hemlock-butte
+    name: Hemlock Butte
+    kind: nordic
+    lat: 43.1325
+    lon: -122.1944
+    elev_ft: 6035
+    nws_grid: MFR/135,105
+  - id: crater-rim
+    name: Crater Lake Rim Village
+    kind: backcountry
+    lat: 42.911
+    lon: -122.144
+    elev_ft: 7126
+    nws_grid: MFR/135,94
+  webcams:
+  - name: OR138 at OR230 Diamond Lake
+    url: https://tripcheck.com/RoadCams/cams/ORE230%20at%20ORE138%20Diamond%20Lake_pid2289.JPG
+    group: Road
+    short: Diamond Lake Jct
+  - name: Crater Lake - Rim Village
+    url: https://www.nps.gov/webcams-crla/camerasinnott.jpg
+    group: NPS
+    short: Rim Village
+  - name: Crater Lake - Steel Information Center
+    url: https://www.nps.gov/webcams-crla/cameraHQ0.jpg
+    group: NPS
+    short: Steel Information Center
+  - name: Crater Lake - Annie Spring Entrance
+    url: https://www.nps.gov/webcams-crla/southentrance.jpg
+    group: NPS
+    short: Annie Spring Entrance
+  - name: Crater Lake - OR 62 at Munson Valley Rd
+    url: https://www.nps.gov/webcams-crla/hwy62%26munson.jpg
+    group: NPS
+    short: OR 62 at Munson Valley Rd
+- id: coast
+  name: Coast Range
+  state: OR
+  road_link: https://www.tripcheck.com/
+  permit: No Sno-Park permit; a recreation pass is required to park at Marys Peak (Siuslaw National Forest).
+  areas:
+  - id: marys-peak
+    name: Marys Peak
+    kind: backcountry
+    lat: 44.5045
+    lon: -123.5525
+    elev_ft: 4097
+    nws_grid: PQR/75,63
+  webcams: []
+- id: adams
+  name: Mt Adams (WA)
+  state: WA
+  road_link: https://wsdot.com/travel/real-time/mountainpasses
+  areas:
+  - id: pineside
+    name: Pineside
+    kind: nordic
+    lat: 46.0491
+    lon: -121.50144
+    elev_ft: 2757
+    nws_grid: PDT/47,133
+  - id: snowking
+    name: SnowKing
+    kind: nordic
+    lat: 46.0543
+    lon: -121.4722
+    elev_ft: 3236
+    nws_grid: PDT/48,134
+  - id: smith-butte
+    name: Smith Butte
+    kind: nordic
+    lat: 46.07909
+    lon: -121.45449
+    elev_ft: 3843
+    nws_grid: PDT/49,135
+  - id: adams-summit
+    name: Mt Adams summit
+    kind: backcountry
+    lat: 46.20242
+    lon: -121.4906
+    elev_ft: 12276
+    nws_grid: PDT/49,141
+    permanent_snowfield: true
+  webcams:
+  - name: USGS Red Mountain (Adams & St. Helens)
+    url: https://volcview.wr.usgs.gov/ashcam-api/images/webcams/adams-REDMT/current.jpg
+    group: USGS
+    short: Red Mountain (Adams & St. Helens)
+  - name: USGS Mt Adams West Face
+    url: https://volcview.wr.usgs.gov/ashcam-api/images/webcams/adams-lucky/current.jpeg
+    group: USGS
+    short: Mt Adams West Face
+- id: helens
+  name: Mt St. Helens (WA)
+  state: WA
+  road_link: https://wsdot.com/travel/real-time/mountainpasses
+  areas:
+  - id: marble-mountain
+    name: Marble Mountain
+    kind: backcountry
+    lat: 46.13029
+    lon: -122.17054
+    elev_ft: 2665
+    nws_grid: PQR/135,129
+  - id: helens-summit
+    name: Mt St. Helens summit
+    kind: backcountry
+    lat: 46.1912
+    lon: -122.1944
+    elev_ft: 8363
+    nws_grid: PQR/135,132
+    permanent_snowfield: true
+  webcams:
+  - name: USGS St. Helens Dome
+    url: https://volcview.wr.usgs.gov/ashcam-api/images/webcams/msh-SUG/current.jpeg
+    group: USGS
+    short: St. Helens Dome
+  - name: USGS St. Helens West Crater
+    url: https://volcview.wr.usgs.gov/ashcam-api/images/webcams/msh-westwall/current.jpeg
+    group: USGS
+    short: St. Helens West Crater
+  - name: USGS St. Helens East Crater
+    url: https://volcview.wr.usgs.gov/ashcam-api/images/webcams/msh-eastwall/current.jpeg
+    group: USGS
+    short: St. Helens East Crater
+- id: rainier
+  name: Mt Rainier (WA)
+  state: WA
+  road_link: https://www.nps.gov/mora/planyourvisit/road-status.htm
+  areas:
+  - id: paradise
+    name: Paradise
+    kind: backcountry
+    lat: 46.7859
+    lon: -121.7355
+    elev_ft: 5414
+    nws_grid: SEW/136,26
+  - id: muir-snowfield
+    name: Muir Snowfield
+    kind: backcountry
+    lat: 46.82
+    lon: -121.731
+    elev_ft: 8419
+    nws_grid: SEW/136,28
+    permanent_snowfield: true
+  webcams:
+  - name: Mt Rainier - Paradise
+    url: https://www.nps.gov/webcams-mora/mountain.jpg
+    group: NPS
+    short: Paradise
+  - name: Mt Rainier - Camp Muir
+    url: https://www.nps.gov/webcams-mora/muir_east.jpg
+    group: NPS
+    short: Camp Muir

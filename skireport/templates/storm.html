@@ -1,0 +1,20 @@
+{% set th = "text-align:left;padding:4px 6px;border-bottom:2px solid #333;font-size:12px" %}
+{% set td = "padding:4px 6px;border-bottom:1px solid #ddd;font-size:13px" %}
+<!doctype html>
+<html>
+<body style="margin:0;padding:16px;background:#fff;color:#111;font-family:Helvetica,Arial,sans-serif;font-size:14px;line-height:1.4">
+<h1 style="font-size:20px;margin:0 0 4px">Cascades Storm Alert</h1>
+<p style="margin:0 0 16px">Forecast through {{ through.strftime("%A, %B %-d") }}. NBM {{ nbm_run.strftime("%HZ %b %-d") }}. Thresholds: {{ snow_threshold }} in of snow, or {{ rain_threshold }} in of rain on existing snow.</p>
+{% for z in zones %}
+<h2 style="font-size:16px;margin:16px 0 6px">{{ z.zone.name }}</h2>
+<table cellspacing="0" cellpadding="0" style="border-collapse:collapse;width:100%">
+<tr><th style="{{ th }}">Area</th><th style="{{ th }}">Snowfall</th><th style="{{ th }}">Rain on snow</th><th style="{{ th }}">Snow level</th></tr>
+{% for x in z.alerts %}
+<tr><td style="{{ td }}">{{ x.area.name }}</td><td style="{{ td }}">{{ x.snow_in|inches }}</td><td style="{{ td }}">{{ "%.1f in"|format(x.rain_in) }}</td><td style="{{ td }}">{{ snow_level(x.snow_level_min_ft, x.snow_level_max_ft) }}</td></tr>
+{% endfor %}
+</table>
+<p style="margin:4px 0;font-size:13px"><a href="https://forecast.weather.gov/MapClick.php?lat={{ z.zone.areas[0].lat }}&lon={{ z.zone.areas[0].lon }}">NWS forecast</a>, <a href="{{ z.zone.road_link }}">road conditions</a></p>
+{% endfor %}
+{% if errors %}<p style="margin:12px 0 0;font-size:12px;color:#a00">Unavailable: {{ errors|join(", ") }}.</p>{% endif %}
+</body>
+</html>

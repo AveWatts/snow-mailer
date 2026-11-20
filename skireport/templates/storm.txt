@@ -1,0 +1,15 @@
+CASCADES STORM ALERT
+Forecast through {{ through.strftime("%A, %B %-d") }}. NBM {{ nbm_run.strftime("%HZ %b %-d") }}. Thresholds: {{ snow_threshold }} in of snow, or {{ rain_threshold }} in of rain on existing snow.
+{% for z in zones %}
+
+== {{ z.zone.name|upper }} ==
+{% for x in z.alerts %}
+{{ x.area.name }}: snowfall {{ x.snow_in|inches }}, rain on snow {{ "%.1f in"|format(x.rain_in) }}, snow level {{ snow_level(x.snow_level_min_ft, x.snow_level_max_ft) }}
+{% endfor %}
+NWS forecast: https://forecast.weather.gov/MapClick.php?lat={{ z.zone.areas[0].lat }}&lon={{ z.zone.areas[0].lon }}
+Road conditions: {{ z.zone.road_link }}
+{% endfor %}
+{% if errors %}
+
+Unavailable: {{ errors|join(", ") }}.
+{% endif %}

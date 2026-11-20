@@ -1,0 +1,49 @@
+name: ski-report
+on:
+  schedule:
+    - cron: "0 14 * 1-6,10-12 4"   # Thursday report, 6 AM PST / 7 AM PDT; never July-September
+    - cron: "0 14 * 1-6,10-12 1"   # Monday storm-alert check
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "thursday or monday"
+        default: thursday
+      dry_run:
+        description: "build without sending"
+        type: boolean
+        default: true
+permissions:
+  contents: write
+concurrency: ski-report
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - id: gate
+        run: python -m skireport gate
+      - if: steps.gate.outputs.go == 'true'
+        run: python -m skireport ${{ inputs.mode || 'auto' }} ${{ inputs.dry_run && '--dry-run' || '' }} --out out/email.html
+        env:
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_APP_PASSWORD: ${{ secrets.SMTP_APP_PASSWORD }}
+          REPORT_TO: ${{ secrets.REPORT_TO }}
+      - if: steps.gate.outputs.go == 'true' && inputs.dry_run
+        uses: actions/upload-artifact@v4
+        with:
+          name: email
+          path: out/
+          retention-days: 14
+      - if: steps.gate.outputs.go == 'true' && !inputs.dry_run
+        run: |
+          git config user.name "ski-report-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add history
+          git diff --cached --quiet || git commit -m "report $(date -u +%F)"
+          git push
