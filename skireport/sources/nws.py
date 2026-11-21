@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 from .. import http
 
 URL = "https://api.weather.gov/gridpoints/{}"
+LAPSE_F_PER_FT = 3.5 / 1000
 _DURATION = re.compile(r"P(?:(\d+)D)?(?:T(?:(\d+)H)?(?:(\d+)M)?)?")
 
 
@@ -33,6 +34,21 @@ def _range(values, start, end, scale):
     vals = [v["value"] * scale for v in values if v["value"] is not None
             and _interval(v["validTime"])[0] < end and _interval(v["validTime"])[1] > start]
     return (min(vals), max(vals)) if vals else (None, None)
+
+
+def _starting_in(values, start, end):
+    return [v["value"] for v in values if v["value"] is not None and start <= _interval(v["validTime"])[0] < end]
+
+
+def temps(props, elev_ft, high_window, low_window):
+    """Warmest high and coldest low (F) whose periods start in each window, moved from the grid
+    cell's elevation to elev_ft."""
+    grid_m = (props.get("elevation") or {}).get("value")
+    shift = 0 if grid_m is None else (grid_m * 3.28084 - elev_ft) * LAPSE_F_PER_FT
+    highs = _starting_in(props.get("maxTemperature", {}).get("values", []), *high_window)
+    lows = _starting_in(props.get("minTemperature", {}).get("values", []), *low_window)
+    f = lambda c: round(c * 9 / 5 + 32 + shift)
+    return f(max(highs)) if highs else None, f(min(lows)) if lows else None
 
 
 def grid(grid_id):

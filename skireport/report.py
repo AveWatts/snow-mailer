@@ -177,6 +177,10 @@ def build_thursday(now=None):
     nws_grids = nws.fetch([a.nws_grid for a in all_areas if a.nws_grid], src.errors)
     fc_start = run + timedelta(hours=h_now) if run else now
     sat_utc, mon_utc = sat.astimezone(timezone.utc), mon.astimezone(timezone.utc)
+    day = datetime.combine(now_local.date(), time(0), PACIFIC)
+    today = (day.astimezone(timezone.utc), (day + timedelta(days=1)).astimezone(timezone.utc))
+    weekend_lows = ((sat - timedelta(hours=12)).astimezone(timezone.utc),
+                    (mon - timedelta(days=1)).astimezone(timezone.utc))
 
     previous = history.previous("thursday", now)
     rows = {}
@@ -198,6 +202,9 @@ def build_thursday(now=None):
         nws_props = nws_grids.get(a.nws_grid)
         nws_total = nws.summary(nws_props, fc_start, mon_utc) if nws_props else None
         nws_weekend = nws.summary(nws_props, sat_utc, mon_utc) if nws_props else None
+        temp_now = nws.temps(nws_props, a.elev_ft, today, today) if nws_props else (None, None)
+        temp_weekend = nws.temps(nws_props, a.elev_ft, (sat_utc, mon_utc), weekend_lows) \
+            if nws_props else (None, None)
         if forecast:
             steps = forecast["steps"].get(a.id, {})
             wk_facts.update(
@@ -254,6 +261,7 @@ def build_thursday(now=None):
             "weekend_score": wk_score, "weekend_condition": wk_cond, "weekend_status": wk_status,
             "depth_change_in": change, "avalanche": avy, "resort": resort, "grooming": groom,
             "drive_s": drive_s.get(a.id), "drive_via": by_id[a.access_from].name if a.access_from else None,
+            "temp_now": temp_now, "temp_weekend": temp_weekend,
             **facts, **wk_facts,
         }
 

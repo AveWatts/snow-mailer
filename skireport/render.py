@@ -36,6 +36,18 @@ def level(rng, elev_ft):
     return text + ("^" if hi > elev_ft else "")
 
 
+def temps(pair):
+    hi, lo = pair
+    if hi is None and lo is None:
+        return "-"
+    show = lambda v: "-" if v is None else f"{v}°"
+    return f"{show(hi)} / {show(lo)}F"
+
+
+def tabular(area):
+    return f"https://forecast.weather.gov/MapClick.php?lat={area.lat}&lon={area.lon}&FcstType=digital"
+
+
 def duration(seconds):
     if seconds is None:
         return None
@@ -44,7 +56,7 @@ def duration(seconds):
 
 
 ENV.filters.update(inches=inches, signed=signed, feet=feet, duration=duration)
-ENV.globals.update(snow_level=snow_level, level=level)
+ENV.globals.update(snow_level=snow_level, level=level, temps=temps, tabular=tabular)
 
 
 def render(name, model):
