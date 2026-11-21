@@ -59,6 +59,7 @@ weights in `skireport/config.py` from that table.
 - `ski-report.yml` runs Thursdays (report) and Mondays (storm check) at 14:00 UTC, **October through June only**.
 - The first step is a snow gate. It continues only if some area or nearby SNOTEL station has more than 12 in of
   snow. Permanent snow (Muir Snowfield and the summits) doesn't count. No snow means no email.
+- `dashboard.yml` rebuilds the dashboard daily at 13:30 UTC, October through June, behind the same snow gate.
 - `keepalive.yml` runs on the 1st of each month. It pushes an empty commit only if the repo has been quiet for
   30 days, because GitHub disables scheduled workflows in public repos after 60 days without activity. It
   fetches nothing and sends nothing.
@@ -82,12 +83,35 @@ weights in `skireport/config.py` from that table.
 
 The recipient address only lives in the `REPORT_TO` secret. GitHub masks secrets in the public run logs.
 
+## Dashboard
+
+A static map-and-list page in `site/`, published with GitHub Pages. It shows every area Now and 48 hours out,
+with the NOHRSC snow depth layer, avalanche forecast zones and the webcams. In the +48h view the snow depth
+layer is a projection built at each rebuild (`skireport/depthmap.py`): NOAA's daily SNODAS depth grid plus the
+next 48 hours of NBM snowfall and rain, by the same rule as the area projections, drawn in the NOHRSC layer's
+classes and colors as `site/data/depth-48h.png`. Each area's detail has a season
+snow depth chart: the nearest SNOTEL station's daily depth since October 1, plus the area's depth from every
+saved weekly report in `history/`. `python -m skireport dashboard` writes
+`site/data/latest.json` (the same scoring as the email, plus the rolling 48-hour projection). The page reads that
+file; there is no server.
+
+To turn it on: Settings > Pages > Build and deployment > Source: **GitHub Actions**, then Actions > dashboard >
+Run workflow. The site is public, so the workflow never gets `BASE_LOCATION` and the data file has no drive times.
+Instead, each visitor can set their own start point on the page. It's kept in their browser, and their browser
+asks OpenStreetMap (Nominatim and OSRM) for the drive times. The email keeps using `BASE_LOCATION`.
+
+Areas you don't drive straight to name where you park: `access_from` points at another area (the summits use
+their winter sno-park), and `access` gives a trailhead's name and coordinates (Mt Jefferson uses Pamelia Lake).
+
+`site/data/webcams.json` is the webcam list with coordinates. Edit it by hand to add or move a camera.
+
 ## Local use
 
 ```bash
 python -m venv .venv && .venv/bin/pip install -r requirements.txt
 .venv/bin/python -m skireport thursday --dry-run --out out/email.html
 .venv/bin/python -m unittest discover -s tests -t .
+.venv/bin/python -m skireport dashboard && python3 -m http.server 8765 --directory site
 ```
 
 ## Adding or changing areas

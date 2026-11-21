@@ -68,6 +68,17 @@ def nearest(area, all_stations):
     return [(d, s) for d, s in near if d <= SNOTEL_RADIUS_KM][:SNOTEL_PER_AREA] or near[:1]
 
 
+def season_depth(triplets, begin, end):
+    """{triplet: [(date, inches), ...]} daily snow depth from begin to end."""
+    data = http.get_json(f"{BASE}/data", params={
+        "stationTriplets": ",".join(sorted(triplets)), "elements": "SNWD", "duration": "DAILY",
+        "beginDate": begin.isoformat(), "endDate": end.isoformat(),
+    })
+    return {st["stationTriplet"]: [(v["date"][:10], v["value"]) for block in st.get("data", [])
+                                   for v in block.get("values", []) if v.get("value") is not None]
+            for st in data}
+
+
 def observations(station_list, days=9, today=None):
     today = today or date.today()
     data = http.get_json(f"{BASE}/data", params={

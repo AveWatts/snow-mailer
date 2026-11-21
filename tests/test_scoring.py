@@ -55,12 +55,27 @@ class History(unittest.TestCase):
         self.assertFalse(h["rain_since_snow"] or h["thaw_since_snow"])
 
 
+class Status(unittest.TestCase):
+    def test_inferred_follows_condition(self):
+        self.assertEqual([scoring.status_now("backcountry", None, None, 40, False, s, 60).value for s in (1, 2, 3, 5)],
+                         ["Closed", "Sketchy", "Open", "Open"])
+        self.assertEqual(scoring.status_now("backcountry", None, None, 40, False, 2, 60).confidence, 60)
+
+    def test_road_closed_wins(self):
+        self.assertEqual(scoring.status_now("nordic", None, None, 40, True, 5, 80).value, "Closed")
+
+    def test_downhill_uses_resort_only(self):
+        resort = {"status": "Open", "lifts_open": 1, "lifts_total": 8, "age_hours": 2}
+        self.assertEqual(scoring.status_now("downhill", resort, None, 5, False, 1, 80).value, "Open")
+        self.assertEqual(scoring.status_now("downhill", None, None, 90, False, 5, 80).value, "Unknown")
+
+    def test_grooming_report_decides(self):
+        fresh = scoring.status_now("nordic", None, {"age_hours": 20}, 5, False, 1, 80, grooming_reported=True)
+        stale = scoring.status_now("nordic", None, {"age_hours": 400}, 90, False, 5, 80, grooming_reported=True)
+        self.assertEqual((fresh.value, stale.value), ("Open", "Closed"))
+
+
 class Confidence(unittest.TestCase):
-    def test_far_below_minimum_is_certain(self):
-        far = scoring.status_now("nordic", None, None, 1, False, 0.3)
-        near = scoring.status_now("nordic", None, None, 11, False, 0.3)
-        self.assertEqual(far.value, "Closed")
-        self.assertGreater(far.confidence, near.confidence)
 
     def test_spread(self):
         self.assertGreater(scoring.forecast_spread({10: 0.9, 50: 1.0, 90: 1.1}),

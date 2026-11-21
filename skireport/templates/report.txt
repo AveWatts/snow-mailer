@@ -62,10 +62,11 @@ Webcams:
 
 HOW TO READ THIS
 Condition: 5 powder (6 in or more new in 3 days, no crust), 4 packed or settled powder (new snow in 7 days or groomed in 48 hours), 3 packed, firm or spring corn, 2 thin cover or crust (rain, freeze-thaw or wind since the last snow), 1 too thin to ski. Skiable from {{ skiable_depth.backcountry }} in backcountry, {{ skiable_depth.nordic }} in nordic, {{ skiable_depth.downhill }} in downhill; below {{ good_depth.backcountry }} / {{ good_depth.nordic }} / {{ good_depth.downhill }} in, condition is capped at 2.
-Best bets rank open areas by snow depth on Sunday (counted up to 120 in) and fresh snow (the last 3 days plus forecast snowfall through Sunday, counted up to 24 in), weighted equally.
+Each section lists the most promising areas first: open, then sketchy, then closed; within each, condition, then depth and fresh snow.
+Best bets list open areas before sketchy ones, and rank each by snow depth on Sunday (counted up to 120 in) and fresh snow (the last 3 days plus forecast snowfall through Sunday, counted up to 24 in), weighted equally.
 Snow level is the elevation where rain turns to snow (NBM, lowest to highest over the period). ^ means it reaches above the area.
 Temperatures are high / low from the NWS forecast, adjusted from the forecast grid's elevation to the area's at 3.5F per 1,000 ft. Now is today's high and tonight's low; weekend is the warmest Saturday or Sunday high and the coldest Saturday or Sunday morning low.
-Status for sno-parks and backcountry is inferred from snow depth and road status. Weekend confidence drops when the NBM 10th-90th percentile precipitation range is wide, when the snow level is within 1,000 ft of the area, or when the NWS forecast disagrees with NBM.
+Status: downhill areas are open or closed as the resort reports it. Nordic centers with a grooming report (Meadows Nordic and the Nordic Pulse areas) are open when groomed in the last 7 days. Other sno-parks and backcountry follow the condition: 1 closed, 2 sketchy, 3 or better open; a road closure closes the areas behind it. Weekend confidence drops when the NBM 10th-90th percentile precipitation range is wide, when the snow level is within 1,000 ft of the area, or when the NWS forecast disagrees with NBM.
 {% if has_drive %}Drive times are from your base location in normal road conditions (OpenStreetMap routing); chains, closures and traffic can add time. Summits and the Muir Snowfield route to their winter access point.
 {% endif %}Sources: resort and grooming reports, NRCS SNOTEL, NOAA NOHRSC, NOAA National Blend of Models, NWS gridpoint forecasts, avalanche.org (NWAC, COAC), ODOT TripCheck, WSDOT, NPS.
 {% if errors %}Unavailable this week: {{ errors|join(", ") }}.

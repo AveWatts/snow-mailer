@@ -63,6 +63,12 @@ def ski_score(depth_in, fresh_in):
             + min(fresh_in, BEST_FRESH_CAP_IN) / BEST_FRESH_CAP_IN)
 
 
+def promise(status, score, depth_in, fresh_in):
+    """Sort key, most promising first: open, then sketchy, then the rest; within each, condition, then depth
+    and fresh snow."""
+    return (scoring.tier(status), -(score or 0), -ski_score(depth_in or 0, fresh_in or 0))
+
+
 def _links(rows, key):
     seen, out = set(), []
     for r in rows:
@@ -116,9 +122,11 @@ def area_now(a, stations, model, resort, groom, road_closed, now):
     station_age = None
     if hist:
         station_age = (now.date() - hist["last_date"]).days * 24 + 12
+    new_2d = hist["new_2d_in"] if hist else 0.0
     new_3d = hist["new_3d_in"] if hist else 0.0
     new_7d = hist["new_7d_in"] if hist else 0.0
     if resort:
+        new_2d = max(new_2d, resort.get("new_48h_in") or 0)
         new_3d = max(new_3d, resort.get("new_48h_in") or 0)
         new_7d = max(new_7d, resort.get("new_7d_in") or new_3d)
 
@@ -135,17 +143,67 @@ def area_now(a, stations, model, resort, groom, road_closed, now):
                   * scoring.freshness(station_age if source != "official" else resort.get("age_hours")))
     score, label = scoring.condition(a.kind, state, now.month)
     cond = scoring.Rated(label, condition_confidence(a.kind, score, depth, scoring.SOURCE_WEIGHT[source] * depth_conf))
-    status = scoring.status_now(a.kind, resort, groom, depth, road_closed, depth_conf)
+    status = scoring.status_now(a.kind, resort, groom, depth, road_closed, score, cond.confidence,
+                                a.id in nordic.REPORTED)
     return state, score, cond, status, depth_conf, {
         "depth_in": depth, "depth_source": source, "station_depth_in": station_depth,
         "model_depth_in": model_depth, "resort_depth_in": resort_depth,
         "station": nearest.station.name if nearest else None,
+        "station_triplet": nearest.station.triplet if nearest else None,
+        "station_elev_ft": round(nearest.station.elev_ft) if nearest else None,
         "station_km": round(nearest.dist_km, 1) if nearest else None,
-        "new_3d_in": round(new_3d, 1), "new_7d_in": round(new_7d, 1),
+        "new_2d_in": round(new_2d, 1), "new_3d_in": round(new_3d, 1), "new_7d_in": round(new_7d, 1),
     }
 
 
-def build_thursday(now=None):
+def project(a, state, score, cond, status, resort, steps, windows, nws_props,
+            h_now, h_start, h_end, fc_start, start_utc, end_utc, month, end_date):
+    """Project the snowpack to h_end: snow before h_start settles in, the h_start-h_end window
+    decides the condition."""
+    pre = analysis.forecast_summary(steps, a.elev_ft, h_now, h_start)
+    main = analysis.forecast_summary(steps, a.elev_ft, h_start, h_end)
+    proj_state, proj_depth = analysis.weekend_state(state, pre, main)
+    window = nbm.best_window(windows, h_start, h_end)
+    pcts = windows.get(window) if window else None
+    nws_total = nws.summary(nws_props, fc_start, end_utc) if nws_props else None
+    nws_main = nws.summary(nws_props, start_utc, end_utc) if nws_props else None
+    agree = scoring.model_agreement(
+        pre["snow_in"] + main["snow_in"], nws_total["snow_in"] if nws_total else None,
+        _mid(analysis.snow_level_range(steps, h_start, h_end)),
+        _mid((nws_main["snow_level_min_ft"], nws_main["snow_level_max_ft"])) if nws_main else None)
+    fc_conf = (scoring.forecast_spread(pcts)
+               * scoring.snow_level_risk(pre["steps"] + main["steps"], a.elev_ft)
+               * agree)
+    p_score, label = scoring.condition(a.kind, proj_state, month)
+    # Square root: the projection leans on the forecast more than on today's snowpack data.
+    base = (cond.confidence / 100 if score else 0.2) ** 0.5 * fc_conf * scoring.WEEKEND_LEAD_FACTOR
+    p_cond = scoring.Rated(label, condition_confidence(a.kind, p_score, proj_depth, base))
+    p_status = scoring.status_weekend(a.kind, status, resort, proj_depth, end_date, fc_conf, p_score, p_cond.confidence,
+                                      a.id in nordic.REPORTED)
+    return p_score, p_cond, p_status, {"pre": pre, "main": main, "projected_depth_in": proj_depth,
+                                       "pcts": pcts, "agree": agree, "nws_total": nws_total}
+
+
+def ahead_view(a, state, score, cond, status, resort, steps, windows, nws_props, h_now, h_end, fc_start, end_utc):
+    end_local = end_utc.astimezone(PACIFIC)
+    p_score, p_cond, p_status, p = project(a, state, score, cond, status, resort, steps, windows, nws_props,
+                                           h_now, h_now, h_end, fc_start, fc_start, end_utc,
+                                           end_local.month, end_local.date())
+    return {
+        "score": p_score, "condition": p_cond, "status": p_status,
+        "depth_in": p["projected_depth_in"],
+        "depth_change_in": round(p["projected_depth_in"] - state.depth_in, 1),
+        "fresh_in": p["main"]["snow_in"],
+        "rain_in": p["main"]["rain_in"],
+        "nws_snow_in": p["nws_total"]["snow_in"] if p["nws_total"] else None,
+        "snow_level": analysis.snow_level_range(steps, h_now, h_end),
+        "temp": nws.temps(nws_props, a.elev_ft, (fc_start, end_utc), (fc_start, end_utc))
+        if nws_props else (None, None),
+    }
+
+
+def build_thursday(now=None, horizon_hours=None):
+    """horizon_hours adds a rolling projection that far past the forecast start, as row["ahead"]."""
     now = now or datetime.now(timezone.utc)
     now_local = now.astimezone(PACIFIC)
     sat, mon = next_weekend(now_local)
@@ -159,23 +217,31 @@ def build_thursday(now=None):
     groom_data = nordic.fetch_all(now, src.errors)
     road_data = roads.fetch(zones, src.errors)
     by_id = {a.id: a for a in all_areas}
+    access = {a.id: areas.access_point(a, by_id) for a in all_areas}
     base = src.run("base location", drive.base_point)
     drive_s = {}
     if base:
-        access = {a.id: (by_id[a.access_from] if a.access_from else a) for a in all_areas}
         drive_s = src.run("drive times", drive.drive_seconds, base,
-                          {aid: (x.lat, x.lon) for aid, x in access.items()}, default={})
+                          {aid: (x.lat, x.lon) if x else (by_id[aid].lat, by_id[aid].lon)
+                           for aid, x in access.items()}, default={})
 
-    run = src.run("NBM run", nbm.latest_run, now, nbm.hours_to(now, mon.astimezone(timezone.utc)))
-    forecast, h_now, h_sat, h_mon = None, 0, 0, 0
+    reach = nbm.hours_to(now, mon.astimezone(timezone.utc))
+    if horizon_hours:
+        reach = max(reach, horizon_hours + 6)
+    run = src.run("NBM run", nbm.latest_run, now, reach)
+    forecast, h_now, h_sat, h_mon, h_ahead = None, 0, 0, 0, 0
     if run:
         h_now = max(0, nbm.hours_to(run, now) - 6)
         h_sat = nbm.hours_to(run, sat.astimezone(timezone.utc))
         h_mon = nbm.hours_to(run, mon.astimezone(timezone.utc))
+        h_ahead = h_now + (horizon_hours or 0)
         points = {a.id: (a.lat, a.lon) for a in all_areas}
-        forecast = src.run("NBM forecast", nbm.fetch, run, h_mon, points, (h_sat, h_mon))
+        qmd_hours = (h_sat, h_mon, h_ahead) if horizon_hours else (h_sat, h_mon)
+        forecast = src.run("NBM forecast", nbm.fetch, run, max(h_mon, h_ahead), points, qmd_hours,
+                           6, 4, (h_now, h_ahead) if horizon_hours else None)
     nws_grids = nws.fetch([a.nws_grid for a in all_areas if a.nws_grid], src.errors)
     fc_start = run + timedelta(hours=h_now) if run else now
+    ahead_utc = fc_start + timedelta(hours=horizon_hours or 0)
     sat_utc, mon_utc = sat.astimezone(timezone.utc), mon.astimezone(timezone.utc)
     day = datetime.combine(now_local.date(), time(0), PACIFIC)
     today = (day.astimezone(timezone.utc), (day + timedelta(days=1)).astimezone(timezone.utc))
@@ -200,8 +266,6 @@ def build_thursday(now=None):
         wk_facts.update(snow_level_now=(None, None), snow_level_sat=(None, None), snow_level_sun=(None, None),
                         nws_snow_by_sun_in=None, model_agreement=None)
         nws_props = nws_grids.get(a.nws_grid)
-        nws_total = nws.summary(nws_props, fc_start, mon_utc) if nws_props else None
-        nws_weekend = nws.summary(nws_props, sat_utc, mon_utc) if nws_props else None
         temp_now = nws.temps(nws_props, a.elev_ft, today, today) if nws_props else (None, None)
         temp_weekend = nws.temps(nws_props, a.elev_ft, (sat_utc, mon_utc), weekend_lows) \
             if nws_props else (None, None)
@@ -212,26 +276,18 @@ def build_thursday(now=None):
                 snow_level_sat=analysis.snow_level_range(steps, h_sat, h_sat + 24),
                 snow_level_sun=analysis.snow_level_range(steps, h_sat + 24, h_mon),
             )
+        ahead = None
         if forecast and state.depth_in is not None:
             steps = forecast["steps"].get(a.id, {})
-            pre = analysis.forecast_summary(steps, a.elev_ft, h_now, h_sat)
-            wk = analysis.forecast_summary(steps, a.elev_ft, h_sat, h_mon)
-            wk_state, proj_depth = analysis.weekend_state(state, pre, wk)
             windows = forecast["percentiles"].get(a.id, {})
-            wk_window = nbm.best_window(windows, h_sat, h_mon)
-            pcts = windows.get(wk_window) if wk_window else None
-            agree = scoring.model_agreement(
-                pre["snow_in"] + wk["snow_in"], nws_total["snow_in"] if nws_total else None,
-                _mid(analysis.snow_level_range(steps, h_sat, h_mon)),
-                _mid((nws_weekend["snow_level_min_ft"], nws_weekend["snow_level_max_ft"])) if nws_weekend else None)
-            fc_conf = (scoring.forecast_spread(pcts)
-                       * scoring.snow_level_risk(pre["steps"] + wk["steps"], a.elev_ft)
-                       * agree)
-            wk_score, wk_label = scoring.condition(a.kind, wk_state, sat.month)
-            # Square root: the weekend call leans on the forecast more than on today's snowpack data.
-            base = (cond.confidence / 100 if score else 0.2) ** 0.5 * fc_conf * scoring.WEEKEND_LEAD_FACTOR
-            wk_cond = scoring.Rated(wk_label, condition_confidence(a.kind, wk_score, proj_depth, base))
-            wk_status = scoring.status_weekend(a.kind, status, resort, proj_depth, mon.date(), fc_conf)
+            wk_score, wk_cond, wk_status, p = project(
+                a, state, score, cond, status, resort, steps, windows, nws_props,
+                h_now, h_sat, h_mon, fc_start, sat_utc, mon_utc, sat.month, mon.date())
+            pre, wk, proj_depth, pcts, agree, nws_total = (p[k] for k in (
+                "pre", "main", "projected_depth_in", "pcts", "agree", "nws_total"))
+            if horizon_hours:
+                ahead = ahead_view(a, state, score, cond, status, resort, steps, windows, nws_props,
+                                   h_now, h_ahead, fc_start, ahead_utc)
             wk_facts |= {
                 "snow_pre_in": pre["snow_in"], "snow_weekend_in": wk["snow_in"],
                 "snow_by_sun_in": round(pre["snow_in"] + wk["snow_in"], 1),
@@ -260,14 +316,18 @@ def build_thursday(now=None):
             "area": a, "score": score, "condition": cond, "status": status,
             "weekend_score": wk_score, "weekend_condition": wk_cond, "weekend_status": wk_status,
             "depth_change_in": change, "avalanche": avy, "resort": resort, "grooming": groom,
-            "drive_s": drive_s.get(a.id), "drive_via": by_id[a.access_from].name if a.access_from else None,
-            "temp_now": temp_now, "temp_weekend": temp_weekend,
+            "drive_s": drive_s.get(a.id), "access": access[a.id],
+            "drive_via": access[a.id].name if access[a.id] else None,
+            "temp_now": temp_now, "temp_weekend": temp_weekend, "ahead": ahead,
             **facts, **wk_facts,
         }
 
     zone_views = []
     for z in zones:
-        zrows = [rows[a.id] for a in z.areas]
+        zrows = sorted((rows[a.id] for a in z.areas), key=lambda r: promise(
+            r["weekend_status"], r["weekend_score"],
+            r["projected_depth_in"] if r["projected_depth_in"] is not None else r["depth_in"],
+            r["new_3d_in"] + (r["snow_by_sun_in"] or 0)))
         avy = {}
         for r in zrows:
             v = r["avalanche"]
@@ -287,18 +347,20 @@ def build_thursday(now=None):
     best = {}
     for kind in KINDS:
         cands = [r for r in rows.values() if r["area"].kind == kind and r["projected_depth_in"] is not None
-                 and r["weekend_status"].value in ("Open", "Limited")]
+                 and scoring.tier(r["weekend_status"]) < 2]
         for r in cands:
             r["fresh_in"] = round(r["new_3d_in"] + (r["snow_by_sun_in"] or 0), 1)
             r["ski_score"] = ski_score(r["projected_depth_in"], r["fresh_in"])
-        cands.sort(key=lambda r: r["ski_score"], reverse=True)
+        cands.sort(key=lambda r: (scoring.tier(r["weekend_status"]), -r["ski_score"]))
         best[kind] = cands[:3]
 
     openings = sorted((r["resort"]["opening_date"], r["area"].name) for r in rows.values()
                       if r["resort"] and r["resort"].get("opening_date") and r["status"].value == "Closed")
 
     return {
-        "kind": "thursday", "openings": openings, "has_drive": bool(drive_s), "generated": now, "generated_local": now_local,
+        "kind": "thursday", "openings": openings, "avalanche_zones": avy_zones,
+        "nbm_sums": (forecast or {}).get("sums"),
+        "ahead_until": ahead_utc.astimezone(PACIFIC) if horizon_hours else None, "has_drive": bool(drive_s), "generated": now, "generated_local": now_local,
         "weekend_start": sat, "weekend_end": mon - timedelta(days=1),
         "nbm_run": run, "zones": zone_views, "rows": rows, "best": best,
         "errors": src.errors, "skiable_depth": SKIABLE_DEPTH_IN, "good_depth": GOOD_DEPTH_IN,

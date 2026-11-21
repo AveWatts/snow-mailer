@@ -18,6 +18,19 @@ def previous(kind, now, max_days=14):
     return None
 
 
+def reported_depths(since):
+    """{area_id: [(date, depth_in), ...]} from every weekly report on or after `since`."""
+    out = {}
+    for p in sorted(DIR.glob("*-thursday.json")):
+        day = date.fromisoformat(p.name[:10])
+        if day < since:
+            continue
+        for aid, rec in json.loads(p.read_text())["areas"].items():
+            if rec.get("depth_in") is not None:
+                out.setdefault(aid, []).append((day.isoformat(), rec["depth_in"]))
+    return out
+
+
 def save_thursday(model):
     DIR.mkdir(exist_ok=True)
     rec = {

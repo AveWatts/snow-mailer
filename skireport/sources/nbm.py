@@ -74,6 +74,7 @@ class Grid:
         lat = eccodes.codes_get_array(h, "latitudes")
         lon = eccodes.codes_get_array(h, "longitudes")
         lon = np.where(lon > 180, lon - 360, lon)
+        self.lat, self.lon = lat, lon
         self.index = {}
         for pid, (plat, plon) in points.items():
             d = (lat - plat) ** 2 + ((lon - plon) * np.cos(np.radians(plat))) ** 2
@@ -109,12 +110,14 @@ def _classify_core(h):
     return None, None
 
 
-def fetch(run, end_hour, points, qmd_hours=(), start_hour=6, workers=4):
+def fetch(run, end_hour, points, qmd_hours=(), start_hour=6, workers=4, sum_window=None):
     """6-hourly core fields for every point from start_hour to end_hour, plus QMD precipitation
-    percentiles for every accumulation window ending at each of qmd_hours."""
+    percentiles for every accumulation window ending at each of qmd_hours. With sum_window=(a, b),
+    also the whole-grid snowfall and precipitation totals over (a, b] as result["sums"]."""
     grid = {}
     steps = {pid: {} for pid in points}
     pct = {pid: {} for pid in points}
+    sums = {}
 
     def core(hour):
         return hour, _download(run, "core", hour, CORE_VARS, CORE_LEVELS)
@@ -134,6 +137,10 @@ def fetch(run, end_hour, points, qmd_hours=(), start_hour=6, workers=4):
             field, scale = _classify_core(h)
             if not field:
                 continue
+            if sum_window and field in ("asnow_in", "apcp_in") and sum_window[0] < hour <= sum_window[1]:
+                v = eccodes.codes_get_values(h)
+                v = np.where(v == _get(h, "missingValue", 9999), 0.0, v)
+                sums[field] = sums.get(field, 0) + v * scale
             for pid, v in grid["g"].sample(h).items():
                 if field == "t2m_c":
                     v -= 273.15
@@ -153,7 +160,9 @@ def fetch(run, end_hour, points, qmd_hours=(), start_hour=6, workers=4):
             p = _get(h, "percentileValue")
             for pid, v in grid["g"].sample(h).items():
                 pct[pid].setdefault(window, {})[p] = v / 25.4
-    return {"run": run, "steps": steps, "percentiles": pct}
+    if sums and "g" in grid:
+        sums |= {"lat": grid["g"].lat, "lon": grid["g"].lon}
+    return {"run": run, "steps": steps, "percentiles": pct, "sums": sums}
 
 
 def best_window(windows, start, end):

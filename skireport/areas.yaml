@@ -282,7 +282,10 @@ zones:
     elev_ft: 10497
     nws_grid: PQR/133,59
     permanent_snowfield: true
-    access_from: santiam-snopark
+    access:
+      name: Pamelia Lake Trailhead
+      lat: 44.65992
+      lon: -121.89138
   - id: three-fingered-jack-summit
     name: Three Fingered Jack summit
     kind: backcountry

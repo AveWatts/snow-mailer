@@ -4,6 +4,7 @@ python -m skireport thursday [--dry-run]  weekly report
 python -m skireport monday [--dry-run]    storm alert check + weekend observation for calibration
 python -m skireport auto [--dry-run]      thursday or monday, by the Pacific weekday
 python -m skireport calibrate             stated confidence vs. how often it was right
+python -m skireport dashboard --out PATH  dashboard data file (JSON)
 """
 import argparse
 import logging
@@ -12,7 +13,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-from . import gate, history, mail, render, report
+from . import dashboard, gate, history, mail, render, report
 
 
 def _output(key, value):
@@ -58,7 +59,7 @@ def monday(args):
 def main():
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
     p = argparse.ArgumentParser(prog="skireport")
-    p.add_argument("command", choices=["gate", "thursday", "monday", "auto", "calibrate"])
+    p.add_argument("command", choices=["gate", "thursday", "monday", "auto", "calibrate", "dashboard"])
     p.add_argument("--dry-run", action="store_true", help="build and render, but do not send")
     p.add_argument("--out", help="also write the rendered email to this .html path")
     args = p.parse_args()
@@ -71,6 +72,10 @@ def main():
     if args.command == "calibrate":
         for (metric, bucket), (rate, n) in history.calibration().items():
             print(f"{metric:9} stated {bucket:2d}-{bucket + 9}%  actual {rate:4.0%}  (n={n})")
+        return
+    if args.command == "dashboard":
+        dashboard.write(args.out or "site/data/latest.json")
+        logging.info("wrote %s", args.out or "site/data/latest.json")
         return
     command = args.command
     if command == "auto":

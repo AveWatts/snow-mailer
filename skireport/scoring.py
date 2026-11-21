@@ -118,46 +118,53 @@ def threshold_certainty(depth_in, kind, data_conf):
     return (0.55 + 0.4 * margin) * (0.6 + 0.4 * data_conf)
 
 
-def status_now(kind, resort, grooming, depth_in, road_closed, depth_conf):
-    """resort: dict(status, lifts_open, lifts_total, age_hours) or None; grooming: dict(age_hours) or None."""
+def status_from_condition(score, confidence, basis):
+    """Inferred status follows the condition: 1 is closed, 2 is sketchy, 3 and up is open."""
+    if not score:
+        return Rated("Unknown", pct(SOURCE_WEIGHT["none"]), ["no snow depth"])
+    return Rated({1: "Closed", 2: "Sketchy"}.get(score, "Open"), confidence, [basis])
+
+
+def tier(status: Rated):
+    """0 open, 1 sketchy, 2 closed or unknown."""
+    return {"Open": 0, "Sketchy": 1}.get(status.value, 2)
+
+
+def status_now(kind, resort, grooming, depth_in, road_closed, score, cond_conf, grooming_reported=False):
+    """Downhill: the resort's own open/closed. Areas with a grooming report: open when groomed in the
+    last 7 days. Everything else follows the condition."""
     if kind == "downhill":
         if resort and resort.get("status"):
-            open_, total = resort.get("lifts_open"), resort.get("lifts_total")
-            value = resort["status"]
-            if value == "Open" and open_ is not None and total and open_ < total / 2:
-                value = "Limited"
-            return Rated(value, pct(SOURCE_WEIGHT["official"] * freshness(resort.get("age_hours"))),
+            return Rated(resort["status"], pct(SOURCE_WEIGHT["official"] * freshness(resort.get("age_hours"))),
                          ["resort report"])
         return Rated("Unknown", pct(SOURCE_WEIGHT["none"]), ["no resort report"])
+    if grooming_reported:
+        if grooming and grooming.get("age_hours") is not None:
+            if grooming["age_hours"] <= 168:
+                return Rated("Open", pct(SOURCE_WEIGHT["grooming"] * freshness(grooming["age_hours"] / 3)),
+                             ["groomed in the last 7 days"])
+            return Rated("Closed", pct(SOURCE_WEIGHT["grooming"]), ["not groomed in 7 days"])
+        return Rated("Unknown", pct(SOURCE_WEIGHT["none"]), ["no grooming report"])
     if road_closed:
         return Rated("Closed", pct(SOURCE_WEIGHT["official"] * 0.9), ["road closed"])
-    if grooming and grooming.get("age_hours") is not None and grooming["age_hours"] <= 168 \
-            and depth_in is not None and depth_in >= SKIABLE_DEPTH_IN[kind]:
-        return Rated("Open", pct(SOURCE_WEIGHT["grooming"] * freshness(grooming["age_hours"] / 3)),
-                     ["groomed in the last 7 days"])
-    if depth_in is None:
-        return Rated("Unknown", pct(SOURCE_WEIGHT["none"]), ["no snow depth"])
-    value = "Open" if depth_in >= SKIABLE_DEPTH_IN[kind] else "Closed"
-    conf = min(SOURCE_WEIGHT["inferred"] + 0.3, threshold_certainty(depth_in, kind, depth_conf))
-    return Rated(value, pct(conf), ["inferred from snow depth"])
+    return status_from_condition(score if depth_in is not None else None, cond_conf, "inferred from condition")
 
 
-def status_weekend(kind, now: Rated, resort, projected_depth, weekend_end, forecast_conf):
+def status_weekend(kind, now: Rated, resort, projected_depth, weekend_end, forecast_conf, score, cond_conf,
+                   grooming_reported=False):
     if kind == "downhill":
         opening = resort.get("opening_date") if resort else None
-        if now.value in ("Open", "Limited"):
-            if projected_depth is not None and projected_depth < SKIABLE_DEPTH_IN[kind]:
-                return Rated("Limited", pct(now.confidence / 100 * forecast_conf * 0.8), ["thin projected base"])
-            return Rated(now.value, pct(now.confidence / 100 * WEEKEND_LEAD_FACTOR), ["currently operating"])
+        if now.value == "Open":
+            return Rated("Open", pct(now.confidence / 100 * WEEKEND_LEAD_FACTOR), ["currently operating"])
         if opening and opening <= weekend_end:
             return Rated("Open", pct(0.75 * forecast_conf), ["announced opening date"])
         if now.value == "Closed":
             return Rated("Closed", pct(now.confidence / 100 * WEEKEND_LEAD_FACTOR), ["no announced opening"])
         return Rated("Unknown", now.confidence, now.basis)
+    if grooming_reported:
+        if now.value == "Unknown":
+            return now
+        return Rated(now.value, pct(now.confidence / 100 * WEEKEND_LEAD_FACTOR), now.basis)
     if now.basis == ["road closed"]:
         return Rated("Closed", pct(now.confidence / 100 * 0.7), ["road closed now"])
-    if projected_depth is None:
-        return Rated("Unknown", pct(SOURCE_WEIGHT["none"]), ["no snow depth"])
-    value = "Open" if projected_depth >= SKIABLE_DEPTH_IN[kind] else "Closed"
-    conf = min(SOURCE_WEIGHT["inferred"] + 0.3, threshold_certainty(projected_depth, kind, forecast_conf))
-    return Rated(value, pct(conf * WEEKEND_LEAD_FACTOR), ["projected snow depth"])
+    return status_from_condition(score if projected_depth is not None else None, cond_conf, "projected condition")

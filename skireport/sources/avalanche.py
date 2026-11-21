@@ -23,6 +23,7 @@ def for_point(lat, lon, zones):
                 "level": level,
                 "link": p.get("link"),
                 "off_season": bool(p.get("off_season")),
+                "issued": p.get("start_date"),
                 "valid_until": p.get("end_date"),
             }
     return None

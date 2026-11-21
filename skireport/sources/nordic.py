@@ -15,6 +15,7 @@ VENUES = {
     "bachelor-nordic": "Mt-Bachelor-Nordic-Center",
     "elk-lake": "Elk-Lake-Resort",
 }
+REPORTED = {"meadows-nordic", *VENUES}
 
 
 def venue(permalink, now):

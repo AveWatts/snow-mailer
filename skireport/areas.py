@@ -16,6 +16,24 @@ class Area:
     permanent_snowfield: bool = False
     nws_grid: str | None = None
     access_from: str | None = None
+    access: dict | None = None
+
+
+@dataclass
+class Access:
+    name: str
+    lat: float
+    lon: float
+
+
+def access_point(area, by_id):
+    """Where you park for this area: its own `access` point, another area's location, or None (the area itself)."""
+    if area.access:
+        return Access(**area.access)
+    if area.access_from:
+        x = by_id[area.access_from]
+        return Access(x.name, x.lat, x.lon)
+    return None
 
 
 @dataclass

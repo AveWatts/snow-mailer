@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cascades Ski Report</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Work+Sans:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top">
+  <div class="brand">Cascades Ski Report</div>
+  <div class="seg" role="group" aria-label="Time">
+    <button type="button" data-mode="now" class="on">Now</button>
+    <button type="button" data-mode="ahead">+48h</button>
+  </div>
+  <div class="updated"><span id="updated"></span> <button type="button" class="start-btn" id="start-btn">Set start point</button></div>
+</header>
+<nav class="tabs" role="group" aria-label="View">
+  <button type="button" data-tab="list" class="on">List</button>
+  <button type="button" data-tab="map">Map</button>
+</nav>
+<main class="layout" data-tab="list">
+  <div id="map" aria-label="Map of ski areas"></div>
+  <aside id="panel">
+    <section id="list"></section>
+    <section id="detail" hidden></section>
+  </aside>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

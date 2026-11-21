@@ -5,3 +5,5 @@ venv/
 out/
 .ssh
 .ssh.pub
+site/data/latest.json
+site/data/depth-48h.png

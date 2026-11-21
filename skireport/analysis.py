@@ -39,6 +39,7 @@ def observed_history(obs):
             thaw = True
 
     return {
+        "new_2d_in": sum(v for d, v in new.items() if d > end - timedelta(days=2)),
         "new_3d_in": sum(v for d, v in new.items() if d > end - timedelta(days=3)),
         "new_7d_in": sum(v for d, v in new.items() if d > end - timedelta(days=7)),
         "rain_since_snow": rain,

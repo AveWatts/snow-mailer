@@ -10,7 +10,7 @@ GOOD_DEPTH_IN = {"downhill": 36, "nordic": 24, "backcountry": 30}
 STORM_SNOW_IN = 12
 STORM_RAIN_ON_SNOW_IN = 1.0
 
-NBM_BOX = {"toplat": 47.0, "bottomlat": 42.7, "leftlon": -123.8, "rightlon": -121.2}
+NBM_BOX = {"toplat": 47.4, "bottomlat": 42.4, "leftlon": -124.6, "rightlon": -120.0}
 
 SNOTEL_RADIUS_KM = 30
 SNOTEL_PER_AREA = 3
