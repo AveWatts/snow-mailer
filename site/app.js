@@ -29,6 +29,38 @@ function fillPanoramas(root) {
   });
 }
 
+// The best picture a map webcam popup can show: a still, the newest panorama, or a stream's live thumbnail;
+// a live player behind a play button when none of those exist.
+async function fillPopupThumb(box, cam) {
+  if (!box || box.dataset.filled) return;
+  box.dataset.filled = "1";
+  const urls = cam.links.map((l) => l.url);
+  const open = urls[0];
+  let src = urls.find((u) => camKind(u) === "image");
+  const aw = urls.find((u) => camKind(u) === "panorama");
+  if (!src && aw) src = await alertwestPanorama(aw.match(/cam-console\/(\d+)/)[1]).catch(() => null);
+  if (!src) {
+    const stream = urls.find((u) => /youtube\.com|youtu\.be|camstreamer\.com/.test(u));
+    const yt = stream && camKind(stream)?.match(/youtube-nocookie\.com\/embed\/([\w-]{11})/);
+    const known = stream && state.data?.zones.flatMap((z) => z.webcams).find((w) => w.url === stream && w.preview);
+    if (yt) src = `https://i.ytimg.com/vi/${yt[1]}/hqdefault_live.jpg?t=${PAGE_LOADED}`;
+    else if (known) src = `${known.preview}?t=${PAGE_LOADED}`;
+  }
+  if (src) {
+    box.innerHTML = `<a href="${esc(open)}" target="_blank" rel="noopener"><img src="${esc(src)}" alt=""></a>`;
+    const img = box.querySelector("img");
+    img.onerror = () => box.replaceChildren();
+    img.onload = () => { if (img.naturalWidth <= 120) box.replaceChildren(); };
+    return;
+  }
+  const player = urls.map(camKind).find((k) => k && k !== "image" && k !== "panorama");
+  if (!player) return;
+  box.innerHTML = `<button type="button" class="pop-play">${PLAY}<span>Live</span></button>`;
+  box.querySelector("button").onclick = () => {
+    box.innerHTML = `<iframe src="${esc(player)}" allow="autoplay; fullscreen" allowfullscreen title="${esc(cam.title)}"></iframe>`;
+  };
+}
+
 function camKind(url) {
   if (IMAGE.test(url) || /^https:\/\/api\.mtbachelor\.com\/api\/v1\/cams\//.test(url)) return "image";
   if (/^https:\/\/alertwest\.live\/cam-console\/\d+/.test(url)) return "panorama";
@@ -51,7 +83,8 @@ const markers = {};
 let map, avyLayer, depthGroup, depthNow, depthAhead, camGroup;
 const spreadOption = L.layerGroup();
 const camMarkers = [];
-const camIcon = (dx, dy) => L.divIcon({ className: "", html: `<div class="cam-pin">${CAMERA}</div>`, iconSize: [14, 14], iconAnchor: [7 - dx, 7 - dy] });
+const camIcon = (dx, dy) => L.divIcon({ className: "", html: `<div class="cam-pin">${CAMERA}</div>`, iconSize: [14, 14], iconAnchor: [7 - dx, 7 - dy],
+  popupAnchor: [dx, dy - 7], tooltipAnchor: [dx + 7, dy] });
 
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const inches = (v) => (v == null ? "-" : v >= 300 ? "300+ in" : `${Math.round(v)} in`);
@@ -239,7 +272,7 @@ function initMap() {
   });
   const layers = L.control.layers({ "Light relief": relief, "USGS topo": topo },
     { "Snow depth (NOHRSC)": depth, "Avalanche danger": avyLayer, Webcams: cams,
-      "Spread out overlapping markers": spreadOption }, { collapsed: true }).addTo(map);
+      "Spread overlapping markers": spreadOption }, { collapsed: true }).addTo(map);
   if (readStore(STORE.spread) !== false) spreadOption.addTo(map);
   map.on("overlayadd overlayremove", (e) => {
     if (e.layer !== spreadOption) return;
@@ -297,11 +330,11 @@ function initMap() {
   map.on("overlayadd overlayremove", (e) => e.layer === cams && state.data && drawMarkers());
   fetch("data/webcams.json").then((r) => r.json()).then((list) => {
     list.forEach((c, i) => {
-      const img = c.links.find((l) => l.image);
       const html = `<b>${esc(c.title)}</b><br><span class="small">${esc(c.note)}</span>
-        ${img ? `<a href="${esc(img.url)}" target="_blank" rel="noopener"><img src="${esc(img.url)}" alt="${esc(img.label)}" loading="lazy"></a>` : ""}
+        <div class="pop-thumb"></div>
         ${c.links.map((l) => `<a href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.label)}</a>`).join("<br>")}`;
-      const marker = L.marker([c.lat, c.lon], { icon: camIcon(0, 0) }).bindPopup(html, { maxWidth: 240 }).addTo(cams);
+      const marker = L.marker([c.lat, c.lon], { icon: camIcon(0, 0) }).bindPopup(html, { minWidth: 240, maxWidth: 240, className: "cam-popup" }).addTo(cams);
+      marker.on("popupopen", (e) => fillPopupThumb(e.popup.getElement().querySelector(".pop-thumb"), c));
       camMarkers.push({ id: `cam-${i}`, lat: c.lat, lon: c.lon, marker });
     });
     if (state.data) drawMarkers();
@@ -380,7 +413,8 @@ function drawMarkers() {
     const low = v && v.condition.confidence < 40;
     const cls = `pin ${a.kind} p${score}${low ? " low" : ""}${state.selected === a.id ? " sel" : ""}`;
     const [dx, dy] = offsets[a.id] || [0, 0];
-    const icon = L.divIcon({ className: "", html: `<div class="${cls}"></div>`, iconSize: [12, 12], iconAnchor: [6 - dx, 6 - dy] });
+    const icon = L.divIcon({ className: "", html: `<div class="${cls}"></div>`, iconSize: [12, 12], iconAnchor: [6 - dx, 6 - dy],
+      popupAnchor: [dx, dy - 6], tooltipAnchor: [dx + 6, dy] });
     const tip = `${a.name}: ${v ? `${v.status.value}, ${v.score ? v.score + "/5 " + v.condition.value : "condition unknown"}` : "no projection"}`;
     if (markers[a.id]) {
       markers[a.id].setIcon(icon).setTooltipContent(esc(tip));
@@ -591,7 +625,7 @@ function renderDetail() {
         ? `${esc(avy.zone)} (${esc(avy.center_name)}) ${avyChip(avy)}<br><span class="small">Issued ${esc(fmtTime(avy.issued + "Z", { weekday: "short", hour: "numeric", minute: "2-digit" }))} · </span><a href="${esc(avy.link)}" target="_blank" rel="noopener">Read forecast</a>`
         : `<span class="small">No avalanche forecast covers this area.</span>`}</span>
       <span class="label">Roads</span><span>${roads.length ? roads.join("") : ""}${z.roads.notes.map((n) => `<div class="small">${esc(n)}</div>`).join("")}${
-        !roads.length && !z.roads.notes.length ? `<span class="small">No road data; check county and Forest Service road status.</span>` : ""}</span>
+        !roads.length && !z.roads.notes.length ? `<span class="small">No road data</span>` : ""}</span>
       <span class="label">Permit</span><span>${esc(z.permit)}</span>
       ${cams ? `<span class="label">Webcams</span><div class="cams">${cams}</div>` : ""}
       <span class="label">Links</span><span class="links">${links.map(([t, u]) => `<a href="${esc(u)}" target="_blank" rel="noopener">${linkIcon(u)}${t}</a>`).join("")}</span>

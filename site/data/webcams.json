@@ -1192,5 +1192,70 @@
     "image": false
    }
   ]
+ },
+ {
+  "title": "Timberline (ALERTWest)",
+  "lat": 45.3331,
+  "lon": -121.7145,
+  "note": "ALERTWest wildfire camera; a 360-degree panorama refreshed every few minutes.",
+  "links": [
+   {
+    "label": "Timberline camera console",
+    "url": "https://alertwest.live/cam-console/11141",
+    "image": false
+   }
+  ]
+ },
+ {
+  "title": "Smith Ridge (ALERTWest)",
+  "lat": 44.2951,
+  "lon": -122.0409,
+  "note": "ALERTWest wildfire camera; a 360-degree panorama refreshed every few minutes.",
+  "links": [
+   {
+    "label": "Smith Ridge camera console",
+    "url": "https://alertwest.live/cam-console/11140",
+    "image": false
+   }
+  ]
+ },
+ {
+  "title": "Henkle Butte (ALERTWest)",
+  "lat": 44.3355,
+  "lon": -121.4859,
+  "note": "ALERTWest wildfire camera; a 360-degree panorama refreshed every few minutes.",
+  "links": [
+   {
+    "label": "Henkle Butte camera console",
+    "url": "https://alertwest.live/cam-console/13503",
+    "image": false
+   }
+  ]
+ },
+ {
+  "title": "Willamette Pass (ALERTWest)",
+  "lat": 43.6098,
+  "lon": -122.0168,
+  "note": "ALERTWest wildfire camera; a 360-degree panorama refreshed every few minutes.",
+  "links": [
+   {
+    "label": "Willamette Pass camera console",
+    "url": "https://alertwest.live/cam-console/16523",
+    "image": false
+   }
+  ]
+ },
+ {
+  "title": "Cinnamon Butte (ALERTWest)",
+  "lat": 43.241,
+  "lon": -122.1096,
+  "note": "ALERTWest wildfire camera; a 360-degree panorama refreshed every few minutes.",
+  "links": [
+   {
+    "label": "Cinnamon Butte camera console",
+    "url": "https://alertwest.live/cam-console/23809",
+    "image": false
+   }
+  ]
  }
 ]

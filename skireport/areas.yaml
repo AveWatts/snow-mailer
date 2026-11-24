@@ -106,6 +106,10 @@ zones:
     permanent_snowfield: true
     access_from: timberline
   webcams:
+  - name: Timberline (ALERTWest)
+    url: https://alertwest.live/cam-console/11141
+    group: ALERTWest
+    short: Timberline
   - name: US26 at Govt Camp Lp Rd
     url: https://tripcheck.com/RoadCams/cams/US26%20at%20Govt%20Camp%20Lp%20Rd_pid1776.JPG
     group: Road
@@ -305,6 +309,10 @@ zones:
     permanent_snowfield: true
     access_from: santiam-snopark
   webcams:
+  - name: Smith Ridge (ALERTWest)
+    url: https://alertwest.live/cam-console/11140
+    group: ALERTWest
+    short: Smith Ridge
   - name: US20 at Santiam Pass
     url: https://tripcheck.com/RoadCams/cams/Santiam%20Pass_pid2728.JPG
     group: Road
@@ -451,6 +459,10 @@ zones:
     permanent_snowfield: true
     access_from: dutchman
   webcams:
+  - name: Henkle Butte (ALERTWest)
+    url: https://alertwest.live/cam-console/13503
+    group: ALERTWest
+    short: Henkle Butte
   - name: Century Drive at MP 21.11
     url: https://tripcheck.com/RoadCams/cams/Century%20Dr%20at%20MP%2021.11%20E_pid3545.JPG
     group: Road
@@ -545,7 +557,29 @@ zones:
     lon: -122.1181
     elev_ft: 4169
     nws_grid: PQR/113,13
+  - id: maiden-peak-summit
+    name: Maiden Peak summit
+    kind: backcountry
+    lat: 43.62679
+    lon: -121.96503
+    elev_ft: 7818
+    nws_grid: PDT/10,25
+    permanent_snowfield: true
+    access_from: gold-lake
+  - id: diamond-peak-summit
+    name: Diamond Peak summit
+    kind: backcountry
+    lat: 43.5207
+    lon: -122.14961
+    elev_ft: 8744
+    nws_grid: PQR/111,9
+    permanent_snowfield: true
+    access_from: salt-creek
   webcams:
+  - name: Willamette Pass (ALERTWest)
+    url: https://alertwest.live/cam-console/16523
+    group: ALERTWest
+    short: Willamette Pass
   - name: OR58 at Willamette Pass
     url: https://tripcheck.com/RoadCams/cams/WillamettePass_pid658.jpg
     group: Road
@@ -589,6 +623,10 @@ zones:
     elev_ft: 7126
     nws_grid: MFR/135,94
   webcams:
+  - name: Cinnamon Butte (ALERTWest)
+    url: https://alertwest.live/cam-console/23809
+    group: ALERTWest
+    short: Cinnamon Butte
   - name: OR138 at OR230 Diamond Lake
     url: https://tripcheck.com/RoadCams/cams/ORE230%20at%20ORE138%20Diamond%20Lake_pid2289.JPG
     group: Road
@@ -628,7 +666,7 @@ zones:
     group: ALERTWest
     short: Marys Peak
 - id: adams
-  name: Mt Adams (WA)
+  name: Mt Adams
   state: WA
   road_link: https://wsdot.com/travel/real-time/mountainpasses
   areas:
@@ -672,7 +710,7 @@ zones:
     group: USGS
     short: Mt Adams West Face
 - id: helens
-  name: Mt St. Helens (WA)
+  name: Mt St. Helens
   state: WA
   road_link: https://wsdot.com/travel/real-time/mountainpasses
   areas:
@@ -706,7 +744,7 @@ zones:
     group: USGS
     short: St. Helens East Crater
 - id: rainier
-  name: Mt Rainier (WA)
+  name: Mt Rainier
   state: WA
   road_link: https://www.nps.gov/mora/planyourvisit/road-status.htm
   areas:

@@ -41,7 +41,7 @@ Roads:
   {{ n }}
 {% endfor %}
 {% if not z.roads.has_data and not z.roads.notes %}
-  No road data for this zone; check county and Forest Service road status.
+  No road data
 {% endif %}
 Permit: {{ z.permit }}
 Links: NWS forecast https://forecast.weather.gov/MapClick.php?lat={{ z.zone.areas[0].lat }}&lon={{ z.zone.areas[0].lon }}

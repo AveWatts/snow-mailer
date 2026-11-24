@@ -83,7 +83,7 @@
 </table>
 {% endif %}
 {% for n in z.roads.notes %}<div style="font-size:12px;color:#45494D;margin-top:3px">{{ n }}</div>{% endfor %}
-{% if not z.roads.has_data and not z.roads.notes %}<span style="font-size:12px;color:#6B6E71">No road data for this zone; check county and Forest Service road status.</span>{% endif %}
+{% if not z.roads.has_data and not z.roads.notes %}<span style="font-size:12px;color:#6B6E71">No road data</span>{% endif %}
 </td></tr>
 <tr><td style="{{ lbl }}">Permit</td><td style="padding:6px 0;vertical-align:top;font-size:13px">{{ z.permit }}</td></tr>
 <tr><td style="{{ lbl }}">Links</td><td style="padding:6px 0;vertical-align:top;font-size:13px">

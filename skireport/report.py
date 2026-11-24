@@ -367,7 +367,8 @@ def build_thursday(now=None, horizon_hours=None):
     }
 
 
-STORM_STEP_IN = 0.5
+STORM_SNOW_STEP_IN = 0.5
+STORM_RAIN_STEP_IN = 0.1
 
 
 def part_of_day(when):
@@ -378,25 +379,37 @@ def part_of_day(when):
     return f"{when:%a} " + ("morning" if when.hour < 12 else "afternoon" if when.hour < 18 else "evening")
 
 
+def _storm_part(alerts, amount, steps, step_min, zone_order, run):
+    """Where, how much and when for one kind of storm (heavy snow, or rain on the snowpack)."""
+    if not alerts:
+        return None
+    hours = sorted({h for x in alerts for h in x[steps]})
+    heaviest = {h: max(x[steps].get(h, 0) for x in alerts) for h in hours}
+    wet = [h for h in hours if heaviest[h] >= step_min]
+    peak = max(wet, key=lambda h: sum(x[steps].get(h, 0) for x in alerts)) if wet else None
+    at = lambda h, back=0: run + timedelta(hours=h - back)
+    ranked = sorted(alerts, key=lambda x: -x[amount])
+    zones = {x["area"].zone.name for x in alerts}
+    return {
+        "count": len(alerts), "zones": [z for z in zone_order if z in zones],
+        "lo": ranked[-1][amount], "hi": ranked[0][amount], "top": [(x["area"], x[amount]) for x in ranked[:3]],
+        "starts": part_of_day(at(wet[0], 6)) if wet else None, "ends": part_of_day(at(wet[-1])) if wet else None,
+        "peak": part_of_day(at(peak, 3)) if peak is not None else None,
+    }
+
+
 def storm_summary(alerts, by_zone, run):
-    """The facts the storm email's opening paragraph is filled from: timing, where, how much, snow level."""
-    hours = sorted({h for x in alerts for h in x["steps"]})
-    heaviest = {h: max(x["steps"].get(h, 0) for x in alerts) for h in hours}
-    snowy = [h for h in hours if heaviest[h] >= STORM_STEP_IN]
-    peak = max(hours, key=lambda h: sum(x["steps"].get(h, 0) for x in alerts)) if hours else None
-    snow = sorted(alerts, key=lambda x: -x["snow_in"])
+    """The facts the storm email's opening paragraph is filled from, split into heavy snow and rain on the
+    snowpack, each with only the areas that crossed that threshold."""
+    order = [z["zone"].name for z in by_zone]
     levels_lo = [x["snow_level_min_ft"] for x in alerts if x["snow_level_min_ft"] is not None]
     levels_hi = [x["snow_level_max_ft"] for x in alerts if x["snow_level_max_ft"] is not None]
-    at = lambda h, back=0: run + timedelta(hours=h - back)
     return {
-        "zones": [z["zone"].name for z in by_zone],
-        "starts": part_of_day(at(snowy[0], 6)) if snowy else None,
-        "ends": part_of_day(at(snowy[-1])) if snowy else None,
-        "peak": part_of_day(at(peak, 3)) if peak is not None and heaviest[peak] >= STORM_STEP_IN else None,
-        "snow_lo": snow[-1]["snow_in"], "snow_hi": snow[0]["snow_in"],
-        "biggest": [(x["area"], x["snow_in"]) for x in snow[:3] if x["snow_in"] >= STORM_STEP_IN],
+        "snow": _storm_part([x for x in alerts if x["snow_in"] >= STORM_SNOW_IN], "snow_in", "steps",
+                            STORM_SNOW_STEP_IN, order, run),
+        "rain": _storm_part([x for x in alerts if x["rain_in"] >= STORM_RAIN_ON_SNOW_IN], "rain_in", "rain_steps",
+                            STORM_RAIN_STEP_IN, order, run),
         "level_lo": min(levels_lo) if levels_lo else None, "level_hi": max(levels_hi) if levels_hi else None,
-        "rain_on_snow": [(x["area"], x["rain_in"]) for x in alerts if x["rain_in"] >= STORM_RAIN_ON_SNOW_IN],
     }
 
 
@@ -429,7 +442,9 @@ def build_storm(now=None):
             alerts.append({"area": a, "snow_in": f["snow_in"], "rain_in": round(rain_on_snow, 2),
                            "snow_level_min_ft": f["snow_level_min_ft"], "snow_level_max_ft": f["snow_level_max_ft"],
                            "steps": {h: s.get("asnow_in", 0) for h, s in forecast["steps"].get(a.id, {}).items()
-                                     if h_now < h <= h_end}})
+                                     if h_now < h <= h_end},
+                           "rain_steps": {h: s.get("apcp_in", 0) for h, s in forecast["steps"].get(a.id, {}).items()
+                                          if h_now < h <= h_end and (s.get("snowlvl_ft") or 0) > a.elev_ft}})
 
     by_zone = []
     for z in zones:

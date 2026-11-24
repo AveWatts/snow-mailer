@@ -15,15 +15,12 @@
 <div style="font-size:13px;color:#D0D1D2;margin-top:2px">Forecast through {{ through.strftime("%A, %B %-d") }} &middot; <a href="{{ site_url }}" style="color:#FFFFFF">View the map</a></div>
 </td></tr>
 <tr><td style="padding:16px 20px 20px">
+{% macro amt(v, rain) %}{{ "%.1f in"|format(v) if rain else v|inches }}{% endmacro %}
+{% macro part(p, title, word, rain) %}<p style="margin:0 0 8px;font-size:15px"><b>{{ title }}</b> at {{ p.count }} area{{ "s" if p.count > 1 }} in {{ p.zones|and_join }}: {{ amt(p.lo, rain) }}{% if p.hi != p.lo %} to {{ amt(p.hi, rain) }}{% endif %}, the most at {% for a, v in p.top %}{{ a.name }} ({{ amt(v, rain) }}){% if not loop.last %}, {% endif %}{% endfor %}.{% if p.starts %} {{ word }} {{ p.starts }} through {{ p.ends }}, heaviest {{ p.peak }}.{% endif %}</p>{% endmacro %}
 {% if s %}
-<p style="margin:0 0 8px;font-size:15px">
-{% if s.starts %}Snow from <b>{{ s.starts }}</b> through <b>{{ s.ends }}</b>{% if s.peak %}, heaviest <b>{{ s.peak }}</b>{% endif %}, across {{ s.zones|and_join }}.
-Forecast snowfall {{ s.snow_lo|inches }} to {{ s.snow_hi|inches }}{% if s.biggest %}; the most at {% for a, v in s.biggest %}{{ a.name }} ({{ v|inches }}){% if not loop.last %}, {% endif %}{% endfor %}{% endif %}.
-{% else %}Rain on existing snow across {{ s.zones|and_join }}.
-{% endif %}
-{% if s.level_lo is not none %}Snow level {{ snow_level(s.level_lo, s.level_hi) }}; below that it falls as rain.{% endif %}
-</p>
-{% if s.rain_on_snow %}<p style="margin:0 0 8px;font-size:14px">Rain on existing snow: {% for a, v in s.rain_on_snow %}{{ a.name }} ({{ "%.1f in"|format(v) }}){% if not loop.last %}, {% endif %}{% endfor %}.</p>{% endif %}
+{% if s.snow %}{{ part(s.snow, "Heavy snow", "Snow", false) }}{% endif %}
+{% if s.rain %}{{ part(s.rain, "Rain on the snowpack", "Rain", true) }}{% endif %}
+{% if s.level_lo is not none %}<p style="margin:0 0 8px;font-size:14px">Snow level {{ snow_level(s.level_lo, s.level_hi) }}; rain below it.</p>{% endif %}
 {% endif %}
 <p style="margin:0 0 4px;font-size:12px;color:#6B6E71">Alert threshold: {{ snow_threshold }} in of snow, or {{ rain_threshold }} in of rain on existing snow, before the weekend is over. Forecast: NBM {{ nbm_run.strftime("%HZ %b %-d") }}.</p>
 {% for z in zones %}
