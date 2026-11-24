@@ -1,0 +1,329 @@
+{
+ "generated": "2026-11-24T01:27:08.477297+00:00",
+ "areas": {
+  "timberline": {
+   "score": 1,
+   "label": "Too thin",
+   "status": "Unknown",
+   "depth_in": 6.3
+  },
+  "summit-pass": {
+   "score": 1,
+   "label": "Too thin",
+   "status": "Unknown",
+   "depth_in": 3.1
+  },
+  "meadows": {
+   "score": 1,
+   "label": "Too thin",
+   "status": "Unknown",
+   "depth_in": 4.3
+  },
+  "skibowl": {
+   "score": 1,
+   "label": "Too thin",
+   "status": "Unknown",
+   "depth_in": 3.5
+  },
+  "cooper-spur": {
+   "score": 1,
+   "label": "Too thin",
+   "status": "Unknown",
+   "depth_in": 2.8
+  },
+  "meadows-nordic": {
+   "score": 1,
+   "label": "Too thin",
+   "status": "Unknown",
+   "depth_in": 5.1
+  },
+  "teacup": {
+   "score": 1,
+   "label": "Too thin",
+   "status": "Closed",
+   "depth_in": 3.9
+  },
+  "trillium": {
+   "score": 1,
+   "label": "No snow",
+   "status": "Closed",
+   "depth_in": 0.8
+  },
+  "white-river": {
+   "score": 1,
+   "label": "Too thin",
+   "status": "Closed",
+   "depth_in": 3.1
+  },
+  "glacier-view": {
+   "score": 1,
+   "label": "Too thin",
+   "status": "Closed",
+   "depth_in": 3.5
+  },
+  "barlow-pass": {
+   "score": 1,
+   "label": "Too thin",
+   "status": "Closed",
+   "depth_in": 4.3
+  },
+  "bennett-pass": {
+   "score": 1,
+   "label": "Too thin",
+   "status": "Closed",
+   "depth_in": 3.5
+  },
+  "tilly-jane": {
+   "score": 1,
+   "label": "Too thin",
+   "status": "Closed",
+   "depth_in": 6.7
+  },
+  "hood-summit": {
+   "score": 2,
+   "label": "Thin cover",
+   "status": "Sketchy",
+   "depth_in": 22.4
+  },
+  "hoodoo": {
+   "score": 1,
+   "label": "Too thin",
+   "status": "Unknown",
+   "depth_in": 3.5
+  },
+  "ray-benson": {
+   "score": 1,
+   "label": "Too thin",
+   "status": "Closed",
+   "depth_in": 3.5
+  },
+  "big-springs": {
+   "score": 1,
+   "label": "Too thin",
+   "status": "Closed",
+   "depth_in": 3.1
+  },
+  "maxwell-butte": {
+   "score": 1,
+   "label": "Too thin",
+   "status": "Closed",
+   "depth_in": 3.1
+  },
+  "lava-lake": {
+   "score": 1,
+   "label": "Too thin",
+   "status": "Closed",
+   "depth_in": 3.1
+  },
+  "santiam-snopark": {
+   "score": 1,
+   "label": "Too thin",
+   "status": "Closed",
+   "depth_in": 3.5
+  },
+  "potato-hill": {
+   "score": 1,
+   "label": "Too thin",
+   "status": "Closed",
+   "depth_in": 3.9
+  },
+  "echo-basin": {
+   "score": 1,
+   "label": "Too thin",
+   "status": "Closed",
+   "depth_in": 3.5
+  },
+  "tombstone": {
+   "score": 1,
+   "label": "Too thin",
+   "status": "Closed",
+   "depth_in": 3.9
+  },
+  "jefferson-summit": {
+   "score": 2,
+   "label": "Crust / ice",
+   "status": "Sketchy",
+   "depth_in": 18.5
+  },
+  "three-fingered-jack-summit": {
+   "score": 1,
+   "label": "Too thin",
+   "status": "Closed",
+   "depth_in": 11.0
+  },
+  "washington-summit": {
+   "score": 1,
+   "label": "Too thin",
+   "status": "Closed",
+   "depth_in": 10.6
+  },
+  "bachelor": {
+   "score": 1,
+   "label": "Too thin",
+   "status": "Unknown",
+   "depth_in": 9.1
+  },
+  "bachelor-nordic": {
+   "score": 1,
+   "label": "Too thin",
+   "status": "Unknown",
+   "depth_in": 9.1
+  },
+  "swampy": {
+   "score": 1,
+   "label": "Too thin",
+   "status": "Closed",
+   "depth_in": 5.1
+  },
+  "meissner": {
+   "score": 1,
+   "label": "Too thin",
+   "status": "Unknown",
+   "depth_in": 1.6
+  },
+  "elk-lake": {
+   "score": 1,
+   "label": "Too thin",
+   "status": "Unknown",
+   "depth_in": 2.4
+  },
+  "dutchman": {
+   "score": 1,
+   "label": "Too thin",
+   "status": "Closed",
+   "depth_in": 8.7
+  },
+  "three-creek-upper": {
+   "score": 1,
+   "label": "Too thin",
+   "status": "Closed",
+   "depth_in": 2.4
+  },
+  "three-creek-lower": {
+   "score": 1,
+   "label": "No snow",
+   "status": "Closed",
+   "depth_in": 0.8
+  },
+  "tam-mcarthur": {
+   "score": 1,
+   "label": "Too thin",
+   "status": "Closed",
+   "depth_in": 9.8
+  },
+  "north-sister-summit": {
+   "score": 2,
+   "label": "Thin cover",
+   "status": "Sketchy",
+   "depth_in": 20.5
+  },
+  "middle-sister-summit": {
+   "score": 2,
+   "label": "Thin cover",
+   "status": "Sketchy",
+   "depth_in": 20.5
+  },
+  "south-sister-summit": {
+   "score": 2,
+   "label": "Crust / ice",
+   "status": "Sketchy",
+   "depth_in": 21.3
+  },
+  "willamette-pass": {
+   "score": 1,
+   "label": "Too thin",
+   "status": "Unknown",
+   "depth_in": 6.3
+  },
+  "gold-lake": {
+   "score": 1,
+   "label": "Too thin",
+   "status": "Closed",
+   "depth_in": 5.9
+  },
+  "waldo": {
+   "score": 1,
+   "label": "Too thin",
+   "status": "Closed",
+   "depth_in": 4.7
+  },
+  "salt-creek": {
+   "score": 1,
+   "label": "Too thin",
+   "status": "Closed",
+   "depth_in": 5.1
+  },
+  "three-lakes": {
+   "score": 1,
+   "label": "Too thin",
+   "status": "Closed",
+   "depth_in": 9.4
+  },
+  "hemlock-butte": {
+   "score": 1,
+   "label": "Too thin",
+   "status": "Closed",
+   "depth_in": 9.8
+  },
+  "crater-rim": {
+   "score": 2,
+   "label": "Thin cover",
+   "status": "Sketchy",
+   "depth_in": 17.3
+  },
+  "marys-peak": {
+   "score": 1,
+   "label": "Too thin",
+   "status": "Closed",
+   "depth_in": 1.2
+  },
+  "pineside": {
+   "score": null,
+   "label": "Unknown",
+   "status": "Unknown",
+   "depth_in": null
+  },
+  "snowking": {
+   "score": 1,
+   "label": "Too thin",
+   "status": "Closed",
+   "depth_in": 4.7
+  },
+  "smith-butte": {
+   "score": 1,
+   "label": "Too thin",
+   "status": "Closed",
+   "depth_in": 5.9
+  },
+  "adams-summit": {
+   "score": 4,
+   "label": "Settled powder",
+   "status": "Open",
+   "depth_in": 300
+  },
+  "marble-mountain": {
+   "score": 1,
+   "label": "Too thin",
+   "status": "Closed",
+   "depth_in": 3.5
+  },
+  "helens-summit": {
+   "score": 5,
+   "label": "Powder",
+   "status": "Open",
+   "depth_in": 30.7
+  },
+  "paradise": {
+   "score": 2,
+   "label": "Thin cover",
+   "status": "Sketchy",
+   "depth_in": 15.4
+  },
+  "muir-snowfield": {
+   "score": 4,
+   "label": "Settled powder",
+   "status": "Open",
+   "depth_in": 216.5
+  }
+ }
+}
