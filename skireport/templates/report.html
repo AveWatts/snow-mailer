@@ -1,11 +1,11 @@
 {% set badge_colors = {5: ("#DCE8F7", "#1A4F8B"), 4: ("#DFF0E1", "#2E6B33"), 3: ("#EEF0D6", "#66651A"), 2: ("#FBE6D6", "#A14A10"), 1: ("#ECECEC", "#666666")} %}
 {% set avy_colors = {1: ("#DFF0E1", "#2E6B33"), 2: ("#FFF6CC", "#7A5B00"), 3: ("#FBE6D6", "#A14A10"), 4: ("#F9DADA", "#9B1C1C"), 5: ("#DDDDDD", "#111111")} %}
-{% set chain_colors = {"carry": ("#FFF6CC", "#7A5B00"), "required": ("#FBE6D6", "#A14A10"), "closed": ("#F9DADA", "#9B1C1C")} %}
+{% set chain_colors = {"carry": "#7A5B00", "required": "#A14A10", "closed": "#9B1C1C"} %}
 {% set label_style = "font-family:'Space Mono',Arial,Helvetica,sans-serif;font-size:11px;letter-spacing:1.5px;color:#6B6E71;text-transform:uppercase" %}
 {% set h2_style = "font-family:'Space Mono',Arial,Helvetica,sans-serif;font-size:15px;font-weight:400;letter-spacing:2px;text-transform:uppercase;color:#141B21;padding-bottom:6px;border-bottom:1px solid #D0D1D2" %}
 {% set link_style = "color:#0486DE;text-decoration:none" %}
 {% set sep = '<span style="color:#ccc">&nbsp;&middot;&nbsp;</span>'|safe %}
-{% macro dots(conf) %}<span title="{{ conf }}% confidence" style="white-space:nowrap">{% if conf >= 70 %}<span style="color:#333">&#9679;&#9679;&#9679;</span>{% elif conf >= 40 %}<span style="color:#333">&#9679;&#9679;</span><span style="color:#ccc">&#9679;</span>{% else %}<span style="color:#333">&#9679;</span><span style="color:#ccc">&#9679;&#9679;</span>{% endif %}</span>{% endmacro %}
+{% macro dots(conf) %}<span title="{{ conf }}% rating confidence" style="white-space:nowrap">{% if conf >= 70 %}<span style="color:#333">&#9679;&#9679;&#9679;</span>{% elif conf >= 40 %}<span style="color:#333">&#9679;&#9679;</span><span style="color:#ccc">&#9679;</span>{% else %}<span style="color:#333">&#9679;</span><span style="color:#ccc">&#9679;&#9679;</span>{% endif %}</span>{% endmacro %}
 {% macro badge(score, size=16) %}{% set c = badge_colors[score] %}<span style="display:inline-block;min-width:{{ size }}px;height:{{ size }}px;line-height:{{ size }}px;padding:0 {{ 3 if size < 20 else 0 }}px;text-align:center;border-radius:3px;background:{{ c[0] }};color:{{ c[1] }};font-size:{{ 11 if size < 20 else 14 }}px;font-weight:bold">{{ score }}</span>{% endmacro %}
 {% macro status(r) %}{% if r.value == "Unknown" %}<span style="color:#999">Unknown</span>{% else %}<span style="{{ {'Open': 'color:#2E6B33;font-weight:bold', 'Sketchy': 'color:#7A5B00;font-weight:bold'}.get(r.value, 'color:#8A8D90') }}">{{ r.value }}</span> {{ dots(r.confidence) }}{% endif %}{% endmacro %}
 {% macro condition(score, r) %}{% if score %}{{ badge(score) }} <span style="color:{{ '#8A8D90' if r.confidence < 40 else '#202326' }}">{{ r.value }}</span> {{ dots(r.confidence) }}{% else %}<span style="color:#999">Unknown</span>{% endif %}{% endmacro %}
@@ -19,13 +19,13 @@
 <table cellspacing="0" cellpadding="0" style="border-collapse:collapse;width:100%;max-width:680px;margin:0 auto;background:#fff">
 <tr><td style="padding:18px 20px;background:#202326">
 <div style="font-family:'Space Mono',Arial,Helvetica,sans-serif;font-size:18px;letter-spacing:3px;text-transform:uppercase;color:#FFFFFF">Cascades Ski Report</div>
-<div style="font-size:13px;color:#D0D1D2;margin-top:2px">{{ generated_local.strftime("%A, %B %-d") }} &middot; Weekend {{ weekend_start.strftime("%a %b %-d") }} - {{ weekend_end.strftime("%a %b %-d") }}</div>
+<div style="font-size:13px;color:#D0D1D2;margin-top:2px">{{ generated_local.strftime("%A, %B %-d") }} &middot; Weekend {{ weekend_start.strftime("%a %b %-d") }} - {{ weekend_end.strftime("%a %b %-d") }} &middot; <a href="{{ site_url }}" style="color:#FFFFFF">View the map</a></div>
 </td></tr>
 <tr><td style="padding:16px 20px 20px">
-<p style="margin:0 0 22px;font-size:12px;color:#6B6E71">Confidence: {{ dots(80) }} high &nbsp; {{ dots(50) }} medium &nbsp; {{ dots(20) }} low. Fresh: new snow in the last 3 days plus forecast snowfall through Sunday. Forecast: NBM {{ nbm_run.strftime("%HZ %b %-d") if nbm_run else "unavailable" }}.</p>
 
-<h2 style="{{ h2_style }};margin:0 0 4px">Best bets this weekend</h2>
-{% for kind in ["backcountry", "nordic", "downhill"] %}
+<h2 style="{{ h2_style }};margin:0 0 4px">Best snow this weekend</h2>
+<p style="margin:0;font-size:12px;color:#6B6E71">Rating confidence: {{ dots(80) }} high &nbsp;{{ dots(50) }} medium &nbsp;{{ dots(20) }} low</p>
+{% for kind in ["nordic", "downhill", "backcountry"] %}
 <p style="margin:14px 0 4px;{{ label_style }}">{{ kind }}</p>
 {% if best[kind] %}
 <table cellspacing="0" cellpadding="0" style="border-collapse:collapse;width:100%">
@@ -33,7 +33,7 @@
 {% set border = "" if loop.first else "border-top:1px solid #eee;" %}
 <tr>
 <td style="width:34px;padding:6px 0;vertical-align:top;{{ border }}">{{ badge(r.weekend_score, 26) }}</td>
-<td style="padding:6px 8px;vertical-align:top;{{ border }}"><b>{{ r.area.name }}</b> <span style="color:#6B6E71">{{ r.weekend_condition.value }}</span><br>
+<td style="padding:6px 8px;vertical-align:top;{{ border }}"><a href="{{ site_url }}#area={{ r.area.id }}" style="color:#202326;text-decoration:none"><b>{{ r.area.name }}</b></a> <span style="color:#6B6E71">{{ r.weekend_condition.value }}</span><br>
 <span style="font-size:12px;color:#6B6E71">{{ r.area.zone.name }}{% if r.drive_s is not none %} &middot; {{ r.drive_s|duration }} drive{% endif %} &middot; {{ r.projected_depth_in|inches }} deep Sun &middot; {{ r.fresh_in|signed }} fresh &middot; snow level {{ level(r.snow_level_weekend, r.area.elev_ft) }} ft</span></td>
 <td style="padding:6px 0;vertical-align:top;text-align:right;{{ border }}">{{ dots(r.weekend_condition.confidence) }}</td>
 </tr>
@@ -62,7 +62,7 @@
 <tr><th style="{{ th }};padding-left:0">Area</th><th style="{{ th }}">Now</th><th style="{{ th }}">Weekend</th><th style="{{ th }}">Snow</th><th style="{{ th }};padding-right:0">Snow level (ft)</th></tr>
 {% for r in z.rows %}
 <tr>
-<td style="{{ td }};padding-left:0;white-space:normal"><b>{{ r.area.name }}</b><br><span style="font-size:11px;color:#8A8D90">{{ r.area.kind|capitalize }} &middot; {{ "{:,}".format(r.area.elev_ft) }} ft{% if r.drive_s is not none %}<br>{{ r.drive_s|duration }} drive{% if r.drive_via %} to {{ r.drive_via }}{% endif %}{% endif %}<br><a href="{{ tabular(r.area) }}" style="{{ link_style }}">Forecast table</a></span></td>
+<td style="{{ td }};padding-left:0;white-space:normal"><a href="{{ site_url }}#area={{ r.area.id }}" style="color:#202326;text-decoration:none"><b>{{ r.area.name }}</b></a><br><span style="font-size:11px;color:#8A8D90">{{ r.area.kind|capitalize }} &middot; {{ "{:,}".format(r.area.elev_ft) }} ft{% if r.drive_s is not none %}<br>{{ r.drive_s|duration }} drive{% if r.drive_via %} to {{ r.drive_via }}{% endif %}{% endif %}<br><a href="{{ tabular(r.area) }}" style="{{ link_style }}">Forecast table</a></span></td>
 <td style="{{ td }};font-size:13px">{{ status(r.status) }}<br>{{ condition(r.score, r.condition) }}<br><span style="font-size:12px;color:#6B6E71;white-space:nowrap">{{ temps(r.temp_now) }}</span></td>
 <td style="{{ td }};font-size:13px">{{ status(r.weekend_status) }}<br>{{ condition(r.weekend_score, r.weekend_condition) }}<br><span style="font-size:12px;color:#6B6E71;white-space:nowrap">{{ temps(r.temp_weekend) }}</span></td>
 <td style="{{ td }};font-size:12px">{{ r.depth_in|inches }} deep<br><span style="color:#6B6E71">{{ r.new_7d_in|signed }} past wk{% if r.depth_change_in is not none %} ({{ r.depth_change_in|signed }}){% endif %}<br>{{ r.depth_change_by_sun_in|signed }} by Sun</span></td>
@@ -77,9 +77,8 @@
 {% if z.roads.checkpoints %}
 <table cellspacing="0" cellpadding="0" style="border-collapse:collapse">
 {% for c in z.roads.checkpoints %}
-<tr><td style="padding:2px 8px 2px 0;font-size:13px">{{ c.name }} <span style="color:#8A8D90;font-size:11px">{{ c.route }}</span></td>
-<td style="padding:2px 8px">{% if c.chain_level %}{{ chip(c.chains, chain_colors[c.chain_level]) }}{% else %}<span style="font-size:12px;color:#6B6E71">{{ c.chains or "No restrictions" }}</span>{% endif %}</td>
-<td style="padding:2px 0;font-size:12px;color:#6B6E71">{{ c.surface or "" }}</td></tr>
+<tr><td style="padding:{{ '0' if loop.first else '6px' }} 0 0;font-size:13px">{{ c.name }} <span style="color:#8A8D90;font-size:11px">{{ c.route }}</span><br>
+{% if c.chain_level %}<span style="font-size:12px;color:{{ chain_colors[c.chain_level] }}">{{ c.chains }}</span>{% else %}<span style="font-size:12px;color:#6B6E71">{{ c.chains or "No restrictions" }}</span>{% endif %}{% if c.surface %}<span style="font-size:12px;color:#6B6E71"> &middot; {{ c.surface }}</span>{% endif %}</td></tr>
 {% endfor %}
 </table>
 {% endif %}
@@ -100,17 +99,8 @@
 </table>
 {% endfor %}
 
-<h2 style="{{ h2_style }};font-size:13px;margin:34px 0 8px">How to read this</h2>
-<p style="margin:4px 0;font-size:12px;color:#45494D">Condition: {{ badge(5) }} powder (6 in or more new in 3 days, no crust) &nbsp;{{ badge(4) }} packed or settled powder (new snow in 7 days, or groomed in 48 hours) &nbsp;{{ badge(3) }} packed, firm or spring corn &nbsp;{{ badge(2) }} thin cover, or crust from rain, freeze-thaw or wind &nbsp;{{ badge(1) }} too thin to ski.</p>
-<p style="margin:4px 0;font-size:12px;color:#45494D">Status: downhill areas are open or closed as the resort reports it. Nordic centers with a grooming report (Meadows Nordic and the Nordic Pulse areas) are open when groomed in the last 7 days. Other sno-parks and backcountry follow the condition: 1 closed, 2 sketchy, 3 or better open.</p>
-<p style="margin:4px 0;font-size:12px;color:#45494D">Each section lists the most promising areas first: open, then sketchy, then closed; within each, condition, then depth and fresh snow.</p>
-<p style="margin:4px 0;font-size:12px;color:#45494D">Best bets list open areas before sketchy ones, and rank each by snow depth on Sunday (counted up to 120 in) and fresh snow (the last 3 days plus forecast snowfall through Sunday, counted up to 24 in), weighted equally.</p>
-<p style="margin:4px 0;font-size:12px;color:#45494D">Skiable from {{ skiable_depth.backcountry }} in (backcountry), {{ skiable_depth.nordic }} in (nordic), {{ skiable_depth.downhill }} in (downhill). Below {{ good_depth.backcountry }} / {{ good_depth.nordic }} / {{ good_depth.downhill }} in the condition is capped at 2.</p>
-<p style="margin:4px 0;font-size:12px;color:#45494D">Confidence dots: {{ dots(80) }} 70% or more, {{ dots(50) }} 40-69%, {{ dots(20) }} under 40%; hover a meter for the exact number. Low-confidence conditions are drawn in gray. Weekend confidence drops when the NBM 10th-90th percentile precipitation range is wide, when the snow level is within 1,000 ft of the area, or when the NWS forecast disagrees with NBM.</p>
-<p style="margin:4px 0;font-size:12px;color:#45494D">Snow level: the elevation where rain turns to snow (NBM, lowest to highest over the period, in feet). ^ means it reaches above the area. A road closure closes the areas behind it.</p>
-<p style="margin:4px 0;font-size:12px;color:#45494D">Temperatures are high / low from the NWS forecast, adjusted from the forecast grid's elevation to the area's at 3.5&deg;F per 1,000 ft. Now is today's high and tonight's low; weekend is the warmest Saturday or Sunday high and the coldest Saturday or Sunday morning low.</p>
-{% if has_drive %}<p style="margin:4px 0;font-size:12px;color:#45494D">Drive times are from your base location in normal road conditions (OpenStreetMap routing); chains, closures and traffic can add time. Summits and the Muir Snowfield route to their winter access point.</p>
-{% endif %}<p style="margin:4px 0;font-size:12px;color:#45494D">Sources: resort and grooming reports, NRCS SNOTEL, NOAA NOHRSC, NOAA National Blend of Models, NWS gridpoint forecasts, avalanche.org (NWAC, COAC), ODOT TripCheck, WSDOT, NPS.</p>
+<h2 style="{{ h2_style }};font-size:13px;margin:34px 0 8px">Sources</h2>
+<p style="margin:4px 0;font-size:12px;color:#45494D">Resort and grooming reports, NRCS SNOTEL, NOAA NOHRSC, NOAA National Blend of Models, NWS, avalanche.org, ODOT TripCheck, WSDOT, NPS.</p>
 {% if errors %}<p style="margin:4px 0;font-size:12px;color:#a00">Unavailable this week: {{ errors|join(", ") }}.</p>{% endif %}
 
 </td></tr></table>

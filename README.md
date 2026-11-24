@@ -35,7 +35,7 @@ Everything is rule-based (`skireport/scoring.py`, `skireport/analysis.py`):
   - 4 Packed powder: new snow in 7 days, or groomed in the last 48 hours.
   - 3 Packed / Spring corn.
   - 2 Crust / ice: rain, freeze-thaw or wind since the last snow.
-  - 1 Too thin / No snow: below the skiable depth (12 in backcountry and nordic, 18 in downhill).
+  - 1 Too thin / No snow: below the skiable depth (12 in nordic, 18 in downhill, 12 in backcountry).
   - Between skiable and good coverage (30 / 24 / 36 in), the condition is capped at 2 (thin cover).
 - **Status:**
   - Downhill uses the resort's own report.
@@ -90,8 +90,11 @@ with the NOHRSC snow depth layer, avalanche forecast zones and the webcams. In t
 layer is a projection built at each rebuild (`skireport/depthmap.py`): NOAA's daily SNODAS depth grid plus the
 next 48 hours of NBM snowfall and rain, by the same rule as the area projections, drawn in the NOHRSC layer's
 classes and colors as `site/data/depth-48h.png`. Each area's detail has a season
-snow depth chart: the nearest SNOTEL station's daily depth since October 1, plus the area's depth from every
-saved weekly report in `history/`. `python -m skireport dashboard` writes
+snow depth chart, drawn the same way everywhere: a blue line for the area's own modeled depth (SNODAS, daily
+since October 1), a gray line for the nearest SNOTEL station when it's within 1,500 ft of the area's
+elevation, and a dashed +48h projection from the blue line's last point. The modeled series lives only on the
+published site (`data/area-depth.json`): each build reads the last one back from the site, adds today, and
+fills up to 14 missing days from the SNODAS archive. `python -m skireport dashboard` writes
 `site/data/latest.json` (the same scoring as the email, plus the rolling 48-hour projection). The page reads that
 file; there is no server.
 
@@ -118,7 +121,7 @@ python -m venv .venv && .venv/bin/pip install -r requirements.txt
 
 Areas live in `skireport/areas.yaml`, grouped by zone, with:
 - coordinates and elevation in feet
-- kind: `downhill`, `nordic` or `backcountry`
+- kind: `nordic`, `downhill` or `backcountry`
 - webcam links for the zone
 
 Resort and grooming adapters are keyed by area id in `skireport/sources/resorts.py` and

@@ -6,8 +6,6 @@ import zlib
 import numpy as np
 from scipy.spatial import cKDTree
 
-from .sources import snodas
-
 SETTLE = 0.5
 RAIN_LOSS_IN = 3
 SNOW_TO_WATER = 10
@@ -46,11 +44,10 @@ def _png(index):
             + chunk(b"PLTE", palette) + chunk(b"tRNS", alpha) + chunk(b"IDAT", zlib.compress(raw, 9)) + chunk(b"IEND", b""))
 
 
-def build(day, box, sums):
-    """(SNODAS date, PNG bytes, [[south, west], [north, east]]) for the projected depth over `box`."""
-    grid_day, depth_mm, lats, lons = snodas.depth(day, box)
+def build(depth_mm, lats, lons, sums):
+    """(PNG bytes, [[south, west], [north, east]]) for the projected depth over a SNODAS grid."""
     res = lats[0] - lats[1]
     classes = np.digitize(np.nan_to_num(project(depth_mm, lats, lons, sums), nan=-1), EDGES_IN)
     image = _png(classes[_mercator_rows(lats, res)])
     bounds = [[lats[-1] - res / 2, lons[0] - res / 2], [lats[0] + res / 2, lons[-1] + res / 2]]
-    return grid_day, image, bounds
+    return image, bounds

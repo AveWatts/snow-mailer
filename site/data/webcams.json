@@ -1179,5 +1179,18 @@
     "image": false
    }
   ]
+ },
+ {
+  "title": "Marys Peak (ALERTWest)",
+  "lat": 44.5074,
+  "lon": -123.57243,
+  "note": "ALERTWest wildfire camera; a 360-degree panorama refreshed every few minutes.",
+  "links": [
+   {
+    "label": "Marys Peak camera console",
+    "url": "https://alertwest.live/cam-console/11126",
+    "image": false
+   }
+  ]
  }
 ]

@@ -36,14 +36,25 @@ def _read(blob, day, box):
     return grid, lats, lons
 
 
+def day_grid(day, box):
+    """(depth in mm with rows north to south, row latitudes, column longitudes) for one day."""
+    return _read(http.get(URL.format(d=day, month=MONTHS[day.month - 1]), timeout=180).content, day, box)
+
+
 def depth(day, box, back=3):
-    """(date, depth in mm with rows north to south, row latitudes, column longitudes) from the newest daily
-    grid on or before `day`."""
+    """(date, depth mm, row latitudes, column longitudes) from the newest daily grid on or before `day`."""
     for d in (day - timedelta(days=i) for i in range(back + 1)):
         try:
-            blob = http.get(URL.format(d=d, month=MONTHS[d.month - 1]), timeout=180).content
+            return (d, *day_grid(d, box))
         except Exception as e:
             log.info("SNODAS %s not available: %s", d, e)
-            continue
-        return (d, *_read(blob, d, box))
     raise RuntimeError(f"no SNODAS grid from the {back + 1} days up to {day}")
+
+
+def sample(grid, lats, lons, points):
+    """{key: inches} at the cell under each (lat, lon); None where the cell has no data."""
+    out = {}
+    for key, (lat, lon) in points.items():
+        v = grid[np.argmin(abs(lats - lat)), np.argmin(abs(lons - lon))]
+        out[key] = None if np.isnan(v) else round(float(v) / 25.4, 1)
+    return out

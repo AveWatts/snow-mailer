@@ -5,7 +5,7 @@ from datetime import datetime, time, timedelta, timezone
 from zoneinfo import ZoneInfo
 
 from . import analysis, areas, history, scoring
-from .config import GOOD_DEPTH_IN, PERMITS, SKIABLE_DEPTH_IN, STORM_RAIN_ON_SNOW_IN, STORM_SNOW_IN
+from .config import GOOD_DEPTH_IN, PERMITS, SITE_URL, SKIABLE_DEPTH_IN, STORM_RAIN_ON_SNOW_IN, STORM_SNOW_IN
 from .sources import avalanche, drive, nbm, nohrsc, nordic, nws, resorts, roads, snotel
 
 log = logging.getLogger(__name__)
@@ -14,7 +14,7 @@ FORECAST_CENTERS = {"NWAC", "COAA"}
 GLACIER_CAP_IN = 300
 BEST_DEPTH_CAP_IN = 120
 BEST_FRESH_CAP_IN = 24
-KINDS = ("downhill", "nordic", "backcountry")
+KINDS = ("nordic", "downhill", "backcountry")
 
 
 class Sources:
@@ -358,12 +358,45 @@ def build_thursday(now=None, horizon_hours=None):
                       if r["resort"] and r["resort"].get("opening_date") and r["status"].value == "Closed")
 
     return {
-        "kind": "thursday", "openings": openings, "avalanche_zones": avy_zones,
+        "kind": "thursday", "openings": openings, "avalanche_zones": avy_zones, "site_url": SITE_URL,
         "nbm_sums": (forecast or {}).get("sums"),
         "ahead_until": ahead_utc.astimezone(PACIFIC) if horizon_hours else None, "has_drive": bool(drive_s), "generated": now, "generated_local": now_local,
         "weekend_start": sat, "weekend_end": mon - timedelta(days=1),
         "nbm_run": run, "zones": zone_views, "rows": rows, "best": best,
         "errors": src.errors, "skiable_depth": SKIABLE_DEPTH_IN, "good_depth": GOOD_DEPTH_IN,
+    }
+
+
+STORM_STEP_IN = 0.5
+
+
+def part_of_day(when):
+    """'Wed afternoon' for a Pacific time; the hours before dawn belong to the night before."""
+    when = when.astimezone(PACIFIC)
+    if when.hour < 6:
+        return f"{(when - timedelta(days=1)):%a} night"
+    return f"{when:%a} " + ("morning" if when.hour < 12 else "afternoon" if when.hour < 18 else "evening")
+
+
+def storm_summary(alerts, by_zone, run):
+    """The facts the storm email's opening paragraph is filled from: timing, where, how much, snow level."""
+    hours = sorted({h for x in alerts for h in x["steps"]})
+    heaviest = {h: max(x["steps"].get(h, 0) for x in alerts) for h in hours}
+    snowy = [h for h in hours if heaviest[h] >= STORM_STEP_IN]
+    peak = max(hours, key=lambda h: sum(x["steps"].get(h, 0) for x in alerts)) if hours else None
+    snow = sorted(alerts, key=lambda x: -x["snow_in"])
+    levels_lo = [x["snow_level_min_ft"] for x in alerts if x["snow_level_min_ft"] is not None]
+    levels_hi = [x["snow_level_max_ft"] for x in alerts if x["snow_level_max_ft"] is not None]
+    at = lambda h, back=0: run + timedelta(hours=h - back)
+    return {
+        "zones": [z["zone"].name for z in by_zone],
+        "starts": part_of_day(at(snowy[0], 6)) if snowy else None,
+        "ends": part_of_day(at(snowy[-1])) if snowy else None,
+        "peak": part_of_day(at(peak, 3)) if peak is not None and heaviest[peak] >= STORM_STEP_IN else None,
+        "snow_lo": snow[-1]["snow_in"], "snow_hi": snow[0]["snow_in"],
+        "biggest": [(x["area"], x["snow_in"]) for x in snow[:3] if x["snow_in"] >= STORM_STEP_IN],
+        "level_lo": min(levels_lo) if levels_lo else None, "level_hi": max(levels_hi) if levels_hi else None,
+        "rain_on_snow": [(x["area"], x["rain_in"]) for x in alerts if x["rain_in"] >= STORM_RAIN_ON_SNOW_IN],
     }
 
 
@@ -394,7 +427,9 @@ def build_storm(now=None):
         rain_on_snow = f["rain_in"] if (facts["depth_in"] or 0) > 0 else 0
         if f["snow_in"] >= STORM_SNOW_IN or rain_on_snow >= STORM_RAIN_ON_SNOW_IN:
             alerts.append({"area": a, "snow_in": f["snow_in"], "rain_in": round(rain_on_snow, 2),
-                           "snow_level_min_ft": f["snow_level_min_ft"], "snow_level_max_ft": f["snow_level_max_ft"]})
+                           "snow_level_min_ft": f["snow_level_min_ft"], "snow_level_max_ft": f["snow_level_max_ft"],
+                           "steps": {h: s.get("asnow_in", 0) for h, s in forecast["steps"].get(a.id, {}).items()
+                                     if h_now < h <= h_end}})
 
     by_zone = []
     for z in zones:
@@ -402,8 +437,9 @@ def build_storm(now=None):
         if za:
             by_zone.append({"zone": z, "alerts": za})
     return {
-        "kind": "storm", "generated": now, "generated_local": now_local,
+        "kind": "storm", "generated": now, "generated_local": now_local, "site_url": SITE_URL,
         "through": mon - timedelta(days=1), "nbm_run": run, "zones": by_zone,
+        "summary": storm_summary(alerts, by_zone, run) if alerts else None,
         "observed": observed, "errors": src.errors,
         "snow_threshold": STORM_SNOW_IN, "rain_threshold": STORM_RAIN_ON_SNOW_IN,
     }

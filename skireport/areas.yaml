@@ -432,6 +432,24 @@ zones:
     nws_grid: PQR/129,33
     permanent_snowfield: true
     access_from: dutchman
+  - id: broken-top-summit
+    name: Broken Top summit
+    kind: backcountry
+    lat: 44.08296
+    lon: -121.6994
+    elev_ft: 9175
+    nws_grid: PDT/23,45
+    permanent_snowfield: true
+    access_from: dutchman
+  - id: tumalo-mountain-summit
+    name: Tumalo Mountain summit
+    kind: backcountry
+    lat: 44.00536
+    lon: -121.6427
+    elev_ft: 7775
+    nws_grid: PDT/24,41
+    permanent_snowfield: true
+    access_from: dutchman
   webcams:
   - name: Century Drive at MP 21.11
     url: https://tripcheck.com/RoadCams/cams/Century%20Dr%20at%20MP%2021.11%20E_pid3545.JPG
@@ -465,6 +483,35 @@ zones:
     url: https://camstreamer.com/embed/7WfyGuaHvti06WYRCx5L1XdgpKWyxHqN0iaDpKR4
     group: Bachelor
     short: Top of Cloudchaser
+- id: newberry
+  name: Newberry Crater
+  state: OR
+  road_link: https://www.tripcheck.com/
+  areas:
+  - id: ten-mile
+    name: Ten Mile Sno-Park
+    kind: nordic
+    lat: 43.70683
+    lon: -121.32734
+    elev_ft: 5580
+    nws_grid: PDT/32,25
+  - id: paulina-lake
+    name: Paulina Lake / caldera
+    kind: backcountry
+    lat: 43.71486
+    lon: -121.27638
+    elev_ft: 6340
+    nws_grid: PDT/34,25
+    access_from: ten-mile
+  - id: paulina-peak-summit
+    name: Paulina Peak summit
+    kind: backcountry
+    lat: 43.6892
+    lon: -121.25493
+    elev_ft: 7980
+    nws_grid: PDT/34,24
+    permanent_snowfield: true
+    access_from: ten-mile
 - id: willamette
   name: Willamette Pass
   state: OR
@@ -575,7 +622,11 @@ zones:
     lon: -123.5525
     elev_ft: 4097
     nws_grid: PQR/75,63
-  webcams: []
+  webcams:
+  - name: Marys Peak (ALERTWest)
+    url: https://alertwest.live/cam-console/11126
+    group: ALERTWest
+    short: Marys Peak
 - id: adams
   name: Mt Adams (WA)
   state: WA

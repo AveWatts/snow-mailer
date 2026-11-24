@@ -1,10 +1,22 @@
+{% set s = summary %}
 CASCADES STORM ALERT
-Forecast through {{ through.strftime("%A, %B %-d") }}. NBM {{ nbm_run.strftime("%HZ %b %-d") }}. Thresholds: {{ snow_threshold }} in of snow, or {{ rain_threshold }} in of rain on existing snow.
+Forecast through {{ through.strftime("%A, %B %-d") }}.
+Map: {{ site_url }}
+{% if s %}
+
+{% if s.starts %}Snow from {{ s.starts }} through {{ s.ends }}{% if s.peak %}, heaviest {{ s.peak }}{% endif %}, across {{ s.zones|and_join }}. Forecast snowfall {{ s.snow_lo|inches }} to {{ s.snow_hi|inches }}{% if s.biggest %}; the most at {% for a, v in s.biggest %}{{ a.name }} ({{ v|inches }}){% if not loop.last %}, {% endif %}{% endfor %}{% endif %}.{% else %}Rain on existing snow across {{ s.zones|and_join }}.{% endif %}{% if s.level_lo is not none %} Snow level {{ snow_level(s.level_lo, s.level_hi) }}; below that it falls as rain.{% endif %}
+{% if s.rain_on_snow %}
+Rain on existing snow: {% for a, v in s.rain_on_snow %}{{ a.name }} ({{ "%.1f in"|format(v) }}){% if not loop.last %}, {% endif %}{% endfor %}.
+{% endif %}
+{% endif %}
+
+Alert threshold: {{ snow_threshold }} in of snow, or {{ rain_threshold }} in of rain on existing snow, before the weekend is over. Forecast: NBM {{ nbm_run.strftime("%HZ %b %-d") }}.
 {% for z in zones %}
 
 == {{ z.zone.name|upper }} ==
 {% for x in z.alerts %}
 {{ x.area.name }}: snowfall {{ x.snow_in|inches }}, rain on snow {{ "%.1f in"|format(x.rain_in) }}, snow level {{ snow_level(x.snow_level_min_ft, x.snow_level_max_ft) }}
+  Map: {{ site_url }}#area={{ x.area.id }}
 {% endfor %}
 NWS forecast: https://forecast.weather.gov/MapClick.php?lat={{ z.zone.areas[0].lat }}&lon={{ z.zone.areas[0].lon }}
 Road conditions: {{ z.zone.road_link }}

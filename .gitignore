@@ -7,3 +7,5 @@ out/
 .ssh.pub
 site/data/latest.json
 site/data/depth-48h.png
+site/data/summit-depth.json
+site/data/area-depth.json

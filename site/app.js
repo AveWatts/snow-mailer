@@ -1,23 +1,61 @@
 "use strict";
 
-const KINDS = ["backcountry", "nordic", "downhill"];
-const KIND_LABEL = { downhill: "Downhill", nordic: "Nordic", backcountry: "Backcountry" };
+const KINDS = ["nordic", "downhill", "backcountry"];
+const KIND_LABEL = { nordic: "Nordic", downhill: "Downhill", backcountry: "Backcountry" };
 const AVY = { 1: "Low", 2: "Moderate", 3: "Considerable", 4: "High", 5: "Extreme" };
 const IMAGE = /\.(jpe?g|png)(\?|$)/i;
+const PAGE_LOADED = Date.now();
+const PLAY = `<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="rgba(32,35,38,.75)"/><path d="M10 8.2v7.6l6-3.8z" fill="#fff"/></svg>`;
+const PLAYERS = [/^https:\/\/api\.wetmet\.net\/widgets\/stream\/frame\.php/, /^https:\/\/video\.nest\.com\/embedded\//,
+  /^https:\/\/vauth\.command\.verkada\.com\/.*\/embed\//, /^https:\/\/camstreamer\.com\/embed\//];
+
+// "image" for a still picture, a player URL for an embeddable stream, or null for a page that has to open in its own tab.
+const panoramas = {};
+
+// ALERTWest names each panorama by capture time, so the newest one is looked up once per page load.
+function alertwestPanorama(id) {
+  panoramas[id] ??= fetch(`https://api.cdn.prod.alertwest.com/api/panorama/list/byCamId?camId=${id}&timestamp=`)
+    .then((r) => r.json())
+    .then((d) => {
+      const cur = d.data[id].cur;
+      return `https://img.cdn.prod.alertwest.com/data/thumb/${id}/${cur.cmlg_date.replaceAll("-", "/")}/${cur.cmlg_img_name}`;
+    });
+  return panoramas[id];
+}
+
+function fillPanoramas(root) {
+  root.querySelectorAll("img[data-alertwest]").forEach((img) => {
+    alertwestPanorama(img.dataset.alertwest).then((src) => { img.src = src; }).catch(() => img.remove());
+  });
+}
+
+function camKind(url) {
+  if (IMAGE.test(url) || /^https:\/\/api\.mtbachelor\.com\/api\/v1\/cams\//.test(url)) return "image";
+  if (/^https:\/\/alertwest\.live\/cam-console\/\d+/.test(url)) return "panorama";
+  const yt = url.match(/youtube\.com\/watch\?v=([\w-]+)/) || url.match(/youtu\.be\/([\w-]+)/);
+  if (yt) return `https://www.youtube-nocookie.com/embed/${yt[1]}?autoplay=1&mute=1`;
+  return PLAYERS.some((re) => re.test(url)) ? url : null;
+}
 const CAMERA = `<svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 7h1a2 2 0 0 0 2-2a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1a2 2 0 0 0 2 2h1a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2"/><circle cx="12" cy="13" r="3"/></svg>`;
 
 const state = { mode: "now", kind: "all", openOnly: false, selected: null, data: null,
   start: null, drive: null, startOpen: false, startError: "", startBusy: false };
-const STORE = { start: "skireport.start", drive: "skireport.drive", skip: "skireport.skipStart" };
-const LATLON = /^\s*(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)\s*$/;
+const STORE = { start: "skireport.start", drive: "skireport.drive", skip: "skireport.skipStart", spread: "skireport.spread" };
+const WARNING = `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4M10.36 3.6 1.9 17.7a1.9 1.9 0 0 0 1.64 2.85h16.9a1.9 1.9 0 0 0 1.64-2.85L13.64 3.6a1.9 1.9 0 0 0-3.28 0zM12 17h.01"/></svg>`;
+const CHEVRON_LEFT = `<svg viewBox="0 0 6 9" preserveAspectRatio="none" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 .9 1.3 4.5 5 8.1"/></svg>`;
+const MOBILE = window.matchMedia("(max-width: 767px)");
+const LATLON =/^\s*(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)\s*$/;
 const AVY_COLORS = { 1: "#50B848", 2: "#FFF200", 3: "#F7941E", 4: "#ED1C24", 5: "#231F20", 0: "#888888" };
 const CENTER_NAMES = { COAA: "COAC" };
 const markers = {};
-let map, avyLayer, depthGroup, depthNow, depthAhead;
+let map, avyLayer, depthGroup, depthNow, depthAhead, camGroup;
+const spreadOption = L.layerGroup();
+const camMarkers = [];
+const camIcon = (dx, dy) => L.divIcon({ className: "", html: `<div class="cam-pin">${CAMERA}</div>`, iconSize: [14, 14], iconAnchor: [7 - dx, 7 - dy] });
 
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const inches = (v) => (v == null ? "-" : v >= 300 ? "300+ in" : `${Math.round(v)} in`);
-const signed = (v) => (v == null ? "-" : `${v >= 0 ? "+" : "-"}${Math.abs(Math.round(v))} in`);
+const signed = (v) => (v == null ? "-" : `${Math.round(v) >= 0 ? "+" : "-"}${Math.abs(Math.round(v))} in`);
 const ft = (v) => (v == null ? "-" : `${(Math.round(v / 100) * 100).toLocaleString()}`);
 
 function level(rng, elev) {
@@ -35,7 +73,7 @@ function temps(pair) {
 
 function dots(conf) {
   const n = conf >= 70 ? 3 : conf >= 40 ? 2 : 1;
-  return `<span class="dots" title="${conf}% confidence"><span class="on">${"●".repeat(n)}</span><span class="off">${"●".repeat(3 - n)}</span></span>`;
+  return `<span class="dots" title="${conf}% rating confidence"><span class="on">${"●".repeat(n)}</span><span class="off">${"●".repeat(3 - n)}</span></span>`;
 }
 
 const badge = (score, big) => `<span class="badge b${score || 0}${big ? " big" : ""}">${score || "?"}</span>`;
@@ -134,9 +172,9 @@ function startCard() {
   if (!show) return "";
   return `<form class="start" id="start-form">
     <div class="name">Show drive times from</div>
-    <input id="start-input" type="text" autocomplete="off" placeholder="Bend, OR or 44.06, -121.31" value="${esc(state.startText ?? state.start?.label ?? "")}" aria-label="Start point">
+    <input id="start-input" type="text" autocomplete="off" placeholder="Corvallis, OR" value="${esc(state.startText ?? state.start?.label ?? "")}" aria-label="Start point">
     ${state.startError ? `<div class="err">${esc(state.startError)}</div>` : ""}
-    <div class="small">Saved on this device only. To work out drive times, it's sent to OpenStreetMap's geocoder and router.</div>
+    <div class="small">Saved on this device only.</div>
     <div class="actions">
       ${state.start ? `<button type="button" class="link" data-action="start-clear">Clear</button>` : ""}
       <button type="button" class="link" data-action="start-skip">${state.start ? "Cancel" : "Skip"}</button>
@@ -162,7 +200,18 @@ function writeHash() {
 }
 
 function initMap() {
-  map = L.map("map", { zoomControl: true, zoomSnap: 0.1 }).setView([44.9, -121.9], 7);
+  map = L.map("map", { zoomControl: true, zoomSnap: 0.1, scrollWheelZoom: false }).setView([44.9, -121.9], 7);
+  // One whole zoom level per scroll step; Leaflet's own wheel zoom lands on uneven fractions with zoomSnap 0.1.
+  let wheelReady = 0;
+  map.getContainer().addEventListener("wheel", (e) => {
+    e.preventDefault();
+    const now = performance.now();
+    if (now < wheelReady || !e.deltaY) return;
+    wheelReady = now + 200;
+    const z = map.getZoom();
+    const target = e.deltaY < 0 ? Math.floor(z + 1e-6) + 1 : Math.ceil(z - 1e-6) - 1;
+    map.setZoomAround(map.mouseEventToContainerPoint(e), Math.max(map.getMinZoom(), Math.min(map.getMaxZoom(), target)));
+  }, { passive: false });
   map.createPane("labels").style.zIndex = 450;
   map.getPane("labels").style.pointerEvents = "none";
   const esri = "https://server.arcgisonline.com/ArcGIS/rest/services/{service}/MapServer/tile/{z}/{y}/{x}";
@@ -188,8 +237,26 @@ function initMap() {
         ${avyChip({ level: p.danger_level })}<br><a href="${esc(p.link)}" target="_blank" rel="noopener">Read forecast</a>`);
     },
   });
-  L.control.layers({ "Light relief": relief, "USGS topo": topo },
-    { "Snow depth (NOHRSC)": depth, "Avalanche danger": avyLayer, Webcams: cams }, { collapsed: true }).addTo(map);
+  const layers = L.control.layers({ "Light relief": relief, "USGS topo": topo },
+    { "Snow depth (NOHRSC)": depth, "Avalanche danger": avyLayer, Webcams: cams,
+      "Spread out overlapping markers": spreadOption }, { collapsed: true }).addTo(map);
+  if (readStore(STORE.spread) !== false) spreadOption.addTo(map);
+  map.on("overlayadd overlayremove", (e) => {
+    if (e.layer !== spreadOption) return;
+    writeStore(STORE.spread, e.type === "overlayadd");
+    if (state.data) drawMarkers();
+  });
+  const box = layers.getContainer();
+  // Leaflet opens the menu on hover; make it open on press and close on a press anywhere else.
+  L.DomEvent.off(box, { mouseenter: layers._expandSafely, mouseleave: layers.collapse }, layers);
+  document.addEventListener("click", (e) => { if (!box.contains(e.target)) layers.collapse(); });
+  // Capture runs before Leaflet's own handler, which can only open the menu.
+  box.querySelector(".leaflet-control-layers-toggle").addEventListener("click", (e) => {
+    if (!box.classList.contains("leaflet-control-layers-expanded")) return;
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    layers.collapse();
+  }, true);
 
   const avyLegend = L.control({ position: "bottomleft" });
   avyLegend.onAdd = () => {
@@ -207,9 +274,9 @@ function initMap() {
   legend.onAdd = () => {
     const div = L.DomUtil.create("div", "legend");
     div.innerHTML = `<div class="lg-title">Condition</div>
-      <div class="lg-row">${[1, 2, 3, 4, 5].map((s) => `<span class="pin downhill p${s}"></span>`).join("")}<span>1 to 5</span></div>
-      <div class="lg-row"><span class="pin downhill p0"></span>Downhill <span class="pin nordic p0"></span>Nordic <span class="pin backcountry p0"></span>Backcountry</div>
-      <div class="lg-row"><span class="pin downhill p4 low"></span>Faded: low confidence</div>`;
+      <div class="lg-row">${[1, 2, 3, 4, 5].map((s) => `<span class="pin nordic p${s}"></span>`).join("")}<span>1 to 5</span></div>
+      <div class="lg-row"><span class="pin nordic p0"></span>Nordic <span class="pin downhill p0"></span>Downhill <span class="pin backcountry p0"></span>Backcountry</div>
+      <div class="lg-row"><span class="pin nordic p4 low"></span>Faded: low rating confidence</div>`;
     return div;
   };
   legend.addTo(map);
@@ -217,28 +284,35 @@ function initMap() {
   const depthLegend = L.control({ position: "bottomleft" });
   depthLegend.onAdd = () => {
     const div = L.DomUtil.create("div", "legend");
-    div.innerHTML = `<div class="lg-title">Snow depth (in)<span id="depth-when"></span></div><div class="lg-grid" id="depth-legend"></div>`;
+    div.innerHTML = `<div class="lg-title">Snow depth (in)<span id="depth-when"></span></div><div class="lg-grid">${
+      DEPTH_CLASSES.map(([color, label]) => `<span><i class="sw${color ? "" : " empty"}" style="background:${color ? `#${color}` : "none"}"></i>${label}</span>`).join("")}</div>`;
     return div;
   };
   const showDepthLegend = (on) => (on ? depthLegend.addTo(map) : depthLegend.remove());
   map.on("overlayadd", (e) => { if (e.layer === depth) { showDepthLegend(true); syncDepth(); } });
   map.on("overlayremove", (e) => e.layer === depth && showDepthLegend(false));
   showDepthLegend(true);
-  loadDepthLegend();
 
+  camGroup = cams;
+  map.on("overlayadd overlayremove", (e) => e.layer === cams && state.data && drawMarkers());
   fetch("data/webcams.json").then((r) => r.json()).then((list) => {
-    for (const c of list) {
-      const icon = L.divIcon({ className: "", html: `<div class="cam-pin">${CAMERA}</div>`, iconSize: [14, 14] });
+    list.forEach((c, i) => {
       const img = c.links.find((l) => l.image);
       const html = `<b>${esc(c.title)}</b><br><span class="small">${esc(c.note)}</span>
         ${img ? `<a href="${esc(img.url)}" target="_blank" rel="noopener"><img src="${esc(img.url)}" alt="${esc(img.label)}" loading="lazy"></a>` : ""}
         ${c.links.map((l) => `<a href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.label)}</a>`).join("<br>")}`;
-      L.marker([c.lat, c.lon], { icon }).bindPopup(html, { maxWidth: 240 }).addTo(cams);
-    }
+      const marker = L.marker([c.lat, c.lon], { icon: camIcon(0, 0) }).bindPopup(html, { maxWidth: 240 }).addTo(cams);
+      camMarkers.push({ id: `cam-${i}`, lat: c.lat, lon: c.lon, marker });
+    });
+    if (state.data) drawMarkers();
   }).catch(() => {});
 }
 
-let depthClasses = null;
+// NOHRSC's snow depth classes and colors; skireport/depthmap.py draws the +48h layer with the same ones.
+const DEPTH_CLASSES = [
+  [null, "0-0.4"], ["abc1bf", "0.4-2"], ["66c1c4", "2-4"], ["63a9cb", "4-10"], ["5079c8", "10-20"], ["3c3fc2", "20-39"],
+  ["5720c3", "39-59"], ["7d01bb", "59-98"], ["b404b1", "98-197"], ["a91377", "197-295"], ["992b50", "295-394"], ["8b4545", "394+"],
+];
 
 function syncDepth() {
   const d = state.data;
@@ -257,51 +331,65 @@ function syncDepth() {
   const el = document.getElementById("depth-when");
   if (el) {
     el.textContent = state.mode !== "ahead" ? ""
-      : m ? ` · ${fmtTime(d.ahead_until, { weekday: "short", hour: "numeric" })} projection` : " · now; no projection today";
+      : m ? " · +48h" : " · now";
   }
 }
 
-function depthRange(label) {
-  const short = (v) => (v < 1 ? v.toFixed(1) : String(Math.round(v)));
-  const [lo, hi] = label.split("-").map((s) => parseFloat(s));
-  return Number.isNaN(hi) ? short(lo) : `${short(lo)}-${short(hi)}`;
-}
-
-function renderDepthLegend() {
-  const el = document.getElementById("depth-legend");
-  if (!el || !depthClasses) return;
-  el.innerHTML = depthClasses.map((c, i) => `<span><img src="data:${c.contentType};base64,${c.imageData}" alt="">${
-    i === depthClasses.length - 1 ? `${depthRange(c.label).split("-")[0]}+` : depthRange(c.label)}</span>`).join("");
-}
-
-function loadDepthLegend() {
-  fetch("https://mapservices.weather.noaa.gov/raster/rest/services/snow/NOHRSC_Snow_Analysis/MapServer/legend?f=json")
-    .then((r) => r.json())
-    .then((d) => {
-      depthClasses = d.layers.find((l) => l.layerId === 3).legend;
-      renderDepthLegend();
-      map.on("overlayadd", renderDepthLegend);
-    })
-    .catch(() => {});
-}
+let fitPending = false;
 
 function fitAreas() {
-  map.fitBounds(L.latLngBounds(state.data.areas.map((a) => [a.lat, a.lon])), { padding: [12, 12] });
+  // A hidden map (the List tab on a phone) has no size, so fitting now would zoom all the way in.
+  fitPending = !document.getElementById("map").offsetWidth;
+  if (!fitPending) map.fitBounds(L.latLngBounds(state.data.areas.map((a) => [a.lat, a.lon])), { padding: [12, 12] });
+}
+
+const PIN_GAP = 14;
+
+function spread(items) {
+  // Screen-space nudge: overlapping markers push each other apart until they're PIN_GAP px apart.
+  const pts = items.map((a, i) => {
+    const p = map.latLngToLayerPoint([a.lat, a.lon]);
+    return { id: a.id, i, x0: p.x, y0: p.y, x: p.x, y: p.y };
+  });
+  for (let pass = 0; pass < 300; pass++) {
+    let moved = false;
+    for (let i = 0; i < pts.length; i++) {
+      for (let j = i + 1; j < pts.length; j++) {
+        const a = pts[i], b = pts[j];
+        let dx = b.x - a.x, dy = b.y - a.y, d = Math.hypot(dx, dy);
+        if (d >= PIN_GAP) continue;
+        if (d < 0.01) { dx = Math.cos(i + j); dy = Math.sin(i + j); d = 1; }
+        const push = ((PIN_GAP - d) / 2) * 1.05;
+        a.x -= (dx / d) * push; a.y -= (dy / d) * push;
+        b.x += (dx / d) * push; b.y += (dy / d) * push;
+        moved = true;
+      }
+    }
+    if (!moved) break;
+  }
+  return Object.fromEntries(pts.map((p) => [p.id, [p.x - p.x0, p.y - p.y0]]));
 }
 
 function drawMarkers() {
+  const cams = map.hasLayer(camGroup) ? camMarkers : [];
+  const offsets = map.hasLayer(spreadOption) ? spread([...state.data.areas, ...cams]) : {};
+  for (const c of camMarkers) c.marker.setIcon(camIcon(...(offsets[c.id] || [0, 0])));
   for (const a of state.data.areas) {
     const v = view(a);
     const score = v && v.score ? v.score : 0;
     const low = v && v.condition.confidence < 40;
     const cls = `pin ${a.kind} p${score}${low ? " low" : ""}${state.selected === a.id ? " sel" : ""}`;
-    const icon = L.divIcon({ className: "", html: `<div class="${cls}"></div>`, iconSize: [12, 12] });
+    const [dx, dy] = offsets[a.id] || [0, 0];
+    const icon = L.divIcon({ className: "", html: `<div class="${cls}"></div>`, iconSize: [12, 12], iconAnchor: [6 - dx, 6 - dy] });
     const tip = `${a.name}: ${v ? `${v.status.value}, ${v.score ? v.score + "/5 " + v.condition.value : "condition unknown"}` : "no projection"}`;
     if (markers[a.id]) {
       markers[a.id].setIcon(icon).setTooltipContent(esc(tip));
     } else {
       markers[a.id] = L.marker([a.lat, a.lon], { icon, keyboard: true, title: a.name })
-        .bindTooltip(esc(tip)).on("click", () => select(a.id, false)).addTo(map);
+        .bindTooltip(esc(tip)).on("click", () => {
+          state.fromMap = document.querySelector(".layout").dataset.tab === "map" && MOBILE.matches;
+          select(a.id, false);
+        }).addTo(map);
     }
     markers[a.id].setZIndexOffset(state.selected === a.id ? 1000 : 0);
   }
@@ -327,10 +415,11 @@ const byPromise = (x, y) => promise(x).reduce((d, k, i) => d || k - promise(y)[i
 
 function renderList() {
   const d = state.data;
-  const label = state.mode === "now" ? "now" : `by ${fmtTime(d.ahead_until, { weekday: "short", hour: "numeric" })}`;
+  const label = state.mode === "now" ? "" : ` ${fmtTime(d.ahead_until, { weekday: "long" })}`;
   const fresh = state.mode === "now" ? "new snow in the last 48 hours" : "forecast snow in the next 48 hours";
-  let html = `${startCard()}<h2>Best bets ${esc(label)}</h2>
-    <p class="small" style="margin:0">Ranked by snow depth and fresh snow (${fresh}).</p><div class="best">`;
+  let html = `${startCard()}<h2>Best snow${esc(label)}</h2>
+    <p class="small" style="margin:0">Ranked by snow depth and fresh snow (${fresh}).</p>
+    <p class="small" style="margin:2px 0 0">Rating confidence: ${dots(80)} high &nbsp;${dots(50)} medium &nbsp;${dots(20)} low</p><div class="best">`;
   for (const kind of KINDS) {
     const ids = d.best[state.mode][kind];
     html += `<div class="label kind">${kind}</div>`;
@@ -346,7 +435,7 @@ function renderList() {
   html += `</div>
     <h2>All areas</h2>
     <div class="filters">
-      <span class="chipset">${["all", ...KINDS.slice().reverse()].map((k) => `<button type="button" data-kind="${k}" class="${state.kind === k ? "on" : ""}">${k === "all" ? "All" : KIND_LABEL[k]}</button>`).join("")}</span>
+      <span class="chipset">${["all", ...KINDS].map((k) => `<button type="button" data-kind="${k}" class="${state.kind === k ? "on" : ""}">${k === "all" ? "All" : KIND_LABEL[k]}</button>`).join("")}</span>
       <label><input type="checkbox" id="open-only" ${state.openOnly ? "checked" : ""}> Open or sketchy only</label>
     </div>`;
 
@@ -360,9 +449,10 @@ function renderList() {
     for (const a of rows) {
       const v = view(a);
       html += `<div class="row${state.selected === a.id ? " sel" : ""}" data-id="${esc(a.id)}">
-        <div><span class="name">${esc(a.name)}</span><div class="meta">${KIND_LABEL[a.kind]} · ${a.elev_ft.toLocaleString()} ft${driveText(a) ? ` · ${duration(driveSec(a))}` : ""} · ${v ? status(v.status) : "-"}</div></div>
-        <div>${v ? condition(v) : `<span class="st-Unknown">Unknown</span>`}</div>
-        <div class="right">${v ? inches(v.depth_in) : "-"}<br><span class="small">${v ? temps(v.temp) : ""}</span></div></div>`;
+        ${badge(v && v.score, true)}
+        <div><span class="name">${esc(a.name)}</span> ${v && v.score ? `<span class="${v.condition.confidence < 40 ? "dim" : "cond"}">${esc(v.condition.value)}</span> ${dots(v.condition.confidence)}` : ""}
+          <div class="meta">${KIND_LABEL[a.kind]} · ${a.elev_ft.toLocaleString()} ft${driveText(a) ? ` · ${duration(driveSec(a))}` : ""} · ${v ? status(v.status) : "-"}</div></div>
+        <div class="right"><b>${v ? inches(v.depth_in) : "-"}</b><br><span class="small">${v ? temps(v.temp) : ""}</span></div></div>`;
     }
   }
   if (!shown) html += `<p class="small">No areas match these filters.</p>`;
@@ -372,45 +462,59 @@ function renderList() {
 
 function footer() {
   const d = state.data;
-  return `<h2>How to read this</h2>
-    <p class="note">Condition: ${badge(5)} powder ${badge(4)} packed or settled powder ${badge(3)} packed, firm or spring corn ${badge(2)} thin cover or crust ${badge(1)} too thin to ski.</p>
-    <p class="note">Status: downhill areas are open or closed as the resort reports it. Nordic centers with a grooming report (Meadows Nordic and the Nordic Pulse areas) are open when groomed in the last 7 days. Other sno-parks and backcountry follow the condition: 1 closed, 2 sketchy, 3 or better open.</p>
-    <p class="note">Each section lists the most promising areas first: open, then sketchy, then closed; within each, condition, then depth and fresh snow. Best bets list open areas before sketchy ones.</p>
-    <p class="note">Confidence: ${dots(80)} 70% or more, ${dots(50)} 40-69%, ${dots(20)} under 40%. Hover for the number.</p>
-    <p class="note">+48h projects the snowpack to ${fmtTime(d.ahead_until, { weekday: "short", hour: "numeric" })}: forecast snow settles in, rain takes depth off. Avalanche danger, roads and permits are current; there is no 48-hour avalanche forecast.</p>
-    <p class="note">Temperatures are high / low from the NWS forecast, adjusted to the area's elevation. Snow level: where rain turns to snow; ^ means it reaches above the area.</p>
-    ${state.drive ? `<p class="note">Drive times are from ${esc(state.start.label)} in normal road conditions (OpenStreetMap routing); chains, closures and traffic can add time. Summits and the Muir Snowfield route to their trailhead or winter access point.</p>` : ""}
-    <p class="note">Sources: resort and grooming reports, NRCS SNOTEL, NOAA NOHRSC, NOAA National Blend of Models, NWS, avalanche.org, ODOT TripCheck, WSDOT, NPS.</p>
+  return `<h2>Sources</h2>
+    <p class="note">Resort and grooming reports, NRCS SNOTEL, NOAA NOHRSC and SNODAS, NOAA National Blend of Models, NWS, avalanche.org, ODOT TripCheck, WSDOT, NPS.</p>
     ${d.errors.length ? `<p class="note" style="color:#a00">Unavailable in this update: ${esc(d.errors.join(", "))}.</p>` : ""}`;
 }
 
+const LINK_ICONS = [
+  [/(^|\.)weather\.gov$/, "noaa"], [/(^|\.)tripcheck\.com$/, "tripcheck"], [/(^|\.)caltopo\.com$/, "caltopo"],
+  [/(^|\.)wsdot\.(com|wa\.gov)$/, "wsdot"], [/(^|\.)nps\.gov$/, "nps"], [/(^|\.)nordic-pulse\.com$/, "nordicpulse"],
+  [/(^|\.)mtbachelor\.com$/, "bachelor"], [/(^|\.)timberlinelodge\.com$/, "timberline"], [/(^|\.)skihood\.com$/, "meadows"],
+  [/(^|\.)skibowl\.com$/, "skibowl"], [/(^|\.)hoodoo\.com$/, "hoodoo"], [/(^|\.)willamettepass\.ski$/, "willamette"],
+  [/(^|\.)cooperspur\.com$/, "cooperspur"],
+];
+
+function linkIcon(url) {
+  const host = new URL(url).hostname;
+  const hit = LINK_ICONS.find(([re]) => re.test(host));
+  return hit ? `<img class="link-icon" src="icons/${hit[1]}.png" alt="">` : "";
+}
+
+const cardAttrs = (mode) => {
+  const cls = `class="card${state.mode === mode ? " active" : ""}"`;
+  return MOBILE.matches ? cls : `${cls} data-mode="${mode}" role="button" tabindex="0" aria-pressed="${state.mode === mode}"`;
+};
+
 function card(a, v, title, mode) {
-  if (!v) return `<div class="card${state.mode === mode ? " active" : ""}" data-mode="${mode}" role="button" tabindex="0" aria-pressed="${state.mode === mode}"><div class="label">${title}</div><div class="line st-Unknown">No projection</div></div>`;
+  if (!v) return `<div ${cardAttrs(mode)}><div class="label">${title}</div><div class="line st-Unknown">No projection</div></div>`;
   const facts = mode === "ahead"
     ? [`${inches(v.depth_in)} deep (${signed(v.depth_change_in)})`,
        `${signed(v.fresh_in)} forecast snow${v.nws_snow_in != null ? ` (NWS ${signed(v.nws_snow_in)})` : ""}`,
        v.rain_in >= 0.1 ? `${v.rain_in.toFixed(1)} in rain` : null]
     : [`${inches(v.depth_in)} deep`, `${signed(v.fresh_in)} last 48h`];
   facts.push(`Snow level ${level(v.snow_level, a.elev_ft)}`, temps(v.temp));
-  return `<div class="card${state.mode === mode ? " active" : ""}" data-mode="${mode}" role="button" tabindex="0" aria-pressed="${state.mode === mode}"><div class="label">${title}</div>
+  return `<div ${cardAttrs(mode)}><div class="label">${title}</div>
     <div class="line">${status(v.status)}</div><div class="line">${condition(v)}</div>
     <div class="facts">${facts.filter(Boolean).join("<br>")}</div></div>`;
 }
 
 function depthChart(a) {
   const d = state.data;
-  const line = (a.station && d.station_depth[a.station.triplet]) || [];
-  if (!line.length) return "";
-  const dots = a.permanent_snowfield ? [] : [...a.reported];
-  const today = d.generated.slice(0, 10);
-  if (!a.permanent_snowfield && a.now.depth_in != null && !dots.some(([day]) => day === today)) dots.push([today, a.now.depth_in]);
-  const proj = !a.permanent_snowfield && a.now.depth_in != null && a.ahead?.depth_in != null
-    ? [d.ahead_until, a.ahead.depth_in] : null;
-  const showProj = !!proj;
+  const CAP = 300;
+  const modeled = Object.entries(d.area_depth?.[a.id] || {}).filter(([, v]) => v != null)
+    .sort(([p], [q]) => p.localeCompare(q)).map(([day, v]) => [day, Math.min(v, CAP)]);
+  const comparable = a.station && Math.abs(a.station.elev_ft - a.elev_ft) <= 1500;
+  const measured = (comparable && d.station_depth[a.station.triplet]) || [];
+  if (!modeled.length && !measured.length) return "";
+  const start = modeled[modeled.length - 1];
+  const proj = start && a.ahead?.depth_change_in != null
+    ? [d.ahead_until, Math.min(CAP, Math.max(0, start[1] + a.ahead.depth_change_in))] : null;
+  const capped = modeled.some(([, v]) => v >= CAP);
 
   const W = 320, H = 120, L0 = 30, R = 8, T = 8, B = 18;
   const t0 = Date.parse(d.season_start), t1 = Math.max(Date.parse(d.ahead_until), t0 + 86400000 * 30);
-  const peak = Math.max(12, ...line.map(([, v]) => v), ...dots.map(([, v]) => v), proj ? proj[1] : 0);
+  const peak = Math.max(12, ...modeled.map(([, v]) => v), ...measured.map(([, v]) => v), proj ? proj[1] : 0);
   const step = peak > 120 ? 48 : peak > 48 ? 24 : 12;
   const top = Math.ceil(peak / step) * step;
   const x = (day) => L0 + ((Date.parse(day) - t0) / (t1 - t0)) * (W - L0 - R);
@@ -427,29 +531,45 @@ function depthChart(a) {
     svg += `<text x="${x(day)}" y="${H - 4}">${m.toLocaleString("en-US", { month: "short", timeZone: "UTC" })}</text>`;
     m.setUTCMonth(m.getUTCMonth() + 1);
   }
-  svg += `<polyline fill="none" stroke="#6B6E71" stroke-width="1.5" points="${line.map(([day, v]) => `${x(day).toFixed(1)},${y(v).toFixed(1)}`).join(" ")}"/>`;
-  svg += dots.map(([day, v]) => `<circle cx="${x(day)}" cy="${y(Math.min(v, top))}" r="${day === today ? 4 : 3}" fill="#1A4F8B"><title>${esc(day)}: ${inches(v)}</title></circle>`).join("");
-  if (showProj) {
+  const path = (pts) => pts.map(([day, v]) => `${x(day).toFixed(1)},${y(v).toFixed(1)}`).join(" ");
+  if (measured.length) svg += `<polyline fill="none" stroke="#A9ABAD" stroke-width="1.25" points="${path(measured)}"/>`;
+  if (modeled.length) svg += `<polyline fill="none" stroke="#1A4F8B" stroke-width="1.75" points="${path(modeled)}"/>`;
+  if (proj) {
     const when = fmtTime(proj[0], { weekday: "short", hour: "numeric" });
-    svg += `<line x1="${x(today)}" y1="${y(a.now.depth_in)}" x2="${x(proj[0])}" y2="${y(proj[1])}" stroke="#1A4F8B" stroke-width="1.5" stroke-dasharray="3 2"/>
+    svg += `<line x1="${x(start[0])}" y1="${y(start[1])}" x2="${x(proj[0])}" y2="${y(proj[1])}" stroke="#1A4F8B" stroke-width="1.5" stroke-dasharray="3 2"/>
       <circle cx="${x(proj[0])}" cy="${y(proj[1])}" r="4" fill="#fff" stroke="#1A4F8B" stroke-width="1.5"><title>${esc(when)}: ${inches(proj[1])} projected</title></circle>`;
   }
 
   return `<div class="chart"><div class="label">Snow depth this season (in)</div>
     <svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Snow depth since ${esc(d.season_start)}">${svg}</svg>
-    <div class="small"><span class="key line"></span> SNOTEL ${esc(a.station.name)}, ${a.station.elev_ft.toLocaleString()} ft, ${a.station.km} km away${
-      dots.length ? ` &nbsp;<span class="key dot"></span> ${esc(a.name)}` : ""}${
-      showProj ? ` &nbsp;<span class="key proj"></span> ${inches(proj[1])} by ${esc(fmtTime(proj[0], { weekday: "short", hour: "numeric" }))} (${signed(a.ahead.depth_change_in)})` : ""}</div></div>`;
+    <div class="keys small">${[
+      modeled.length && `<span><i class="key model"></i>Modeled at ${esc(a.name)} (NOAA SNODAS)${capped ? `, ${CAP}+ in shown at ${CAP}` : ""}</span>`,
+      measured.length && `<span><i class="key line"></i>Measured at ${esc(a.station.name)}, ${a.station.elev_ft.toLocaleString()} ft</span>`,
+      proj && `<span><i class="key proj"></i>+48h projection: ${inches(proj[1])} (${signed(a.ahead.depth_change_in)})</span>`,
+    ].filter(Boolean).join("")}</div></div>`;
 }
 
 function renderDetail() {
   const a = byId(state.selected), z = zoneOf(a), d = state.data;
   const avy = a.avalanche && z.avalanche.some((v) => v.zone === a.avalanche.zone) ? a.avalanche : null;
-  const roads = z.roads.checkpoints.map((c) => `${esc(c.name)} <span class="small">${esc(c.route)}</span> ${
-    c.chain_level ? `<span class="chip c-${esc(c.chain_level)}">${esc(c.chains)}</span>` : `<span class="small">${esc(c.chains || "No restrictions")}</span>`}${c.surface ? ` <span class="small">${esc(c.surface)}</span>` : ""}`);
-  const cams = z.webcams.map((c) => IMAGE.test(c.url)
-    ? `<a href="${esc(c.url)}" target="_blank" rel="noopener"><img src="${esc(c.url)}" alt="${esc(c.name)}" loading="lazy">${esc(c.short)}</a>`
-    : `<a href="${esc(c.url)}" target="_blank" rel="noopener">${esc(c.short)}</a>`).join("");
+  const roads = z.roads.checkpoints.map((c) => `<div class="road">${esc(c.name)} <span class="small">${esc(c.route)}</span><br>${
+    c.chain_level ? `<span class="warn w-${esc(c.chain_level)}">${WARNING}${esc(c.chains)}</span>` : `<span class="small">${esc(c.chains || "No restrictions")}</span>`}${c.surface ? `<span class="small"> · ${esc(c.surface)}</span>` : ""}</div>`);
+  const cams = z.webcams.map((c) => {
+    const kind = camKind(c.url);
+    if (kind === "panorama") {
+      const id = c.url.match(/cam-console\/(\d+)/)[1];
+      return `<a href="${esc(c.url)}" target="_blank" rel="noopener" class="cam-pano"><img data-alertwest="${id}" alt="${esc(c.name)}">${esc(c.short)} · 360°</a>`;
+    }
+    if (kind === "image") {
+      return `<a href="${esc(c.url)}" target="_blank" rel="noopener"><img src="${esc(c.url)}" alt="${esc(c.name)}" loading="lazy">${esc(c.short)}</a>`;
+    }
+    if (kind) {
+      const still = c.preview
+        ? `<img class="cam-still" src="${esc(c.preview)}?t=${PAGE_LOADED}" alt="" loading="lazy" onerror="this.remove()" onload="this.naturalWidth <= 120 && this.remove()">` : "";
+      return `<button type="button" class="cam-play" data-src="${esc(kind)}" aria-label="Play ${esc(c.name)}"><span class="cam-screen">${still}${PLAY}<span>Live</span></span>${esc(c.short)}</button>`;
+    }
+    return `<a href="${esc(c.url)}" target="_blank" rel="noopener" class="cam-link">${esc(c.short)}</a>`;
+  }).join("");
   const links = [
     a.resort_url && ["Resort report", a.resort_url],
     a.grooming_url && ["Grooming", a.grooming_url],
@@ -460,7 +580,7 @@ function renderDetail() {
   const until = fmtTime(d.ahead_until, { weekday: "short", hour: "numeric" });
 
   document.getElementById("detail").innerHTML = `
-    <button type="button" class="back" id="back">← All areas</button>
+    <button type="button" class="back" id="back">${CHEVRON_LEFT}${state.fromMap ? "Map" : "All areas"}</button>
     <p class="title">${esc(a.name)}</p>
     <div class="small">${KIND_LABEL[a.kind]} · ${a.elev_ft.toLocaleString()} ft · ${esc(z.name)}${
       driveText(a) ? ` · ${driveText(a)}${a.access ? ` to ${esc(a.access.name)}` : ""}` : a.access ? ` · access from ${esc(a.access.name)}` : ""}</div>
@@ -470,16 +590,22 @@ function renderDetail() {
       <span class="label">Avalanche</span><span>${avy
         ? `${esc(avy.zone)} (${esc(avy.center_name)}) ${avyChip(avy)}<br><span class="small">Issued ${esc(fmtTime(avy.issued + "Z", { weekday: "short", hour: "numeric", minute: "2-digit" }))} · </span><a href="${esc(avy.link)}" target="_blank" rel="noopener">Read forecast</a>`
         : `<span class="small">No avalanche forecast covers this area.</span>`}</span>
-      <span class="label">Roads</span><span>${roads.length ? roads.join("<br>") : ""}${z.roads.notes.map((n) => `<div class="small">${esc(n)}</div>`).join("")}${
+      <span class="label">Roads</span><span>${roads.length ? roads.join("") : ""}${z.roads.notes.map((n) => `<div class="small">${esc(n)}</div>`).join("")}${
         !roads.length && !z.roads.notes.length ? `<span class="small">No road data; check county and Forest Service road status.</span>` : ""}</span>
       <span class="label">Permit</span><span>${esc(z.permit)}</span>
       ${cams ? `<span class="label">Webcams</span><div class="cams">${cams}</div>` : ""}
-      <span class="label">Links</span><span class="links">${links.map(([t, u]) => `<a href="${esc(u)}" target="_blank" rel="noopener">${t}</a>`).join("")}</span>
+      <span class="label">Links</span><span class="links">${links.map(([t, u]) => `<a href="${esc(u)}" target="_blank" rel="noopener">${linkIcon(u)}${t}</a>`).join("")}</span>
     </div>`;
-  document.getElementById("back").onclick = () => select(null);
+  fillPanoramas(document.getElementById("detail"));
+  document.getElementById("back").onclick = () => {
+    const toMap = state.fromMap;
+    select(null);
+    if (toMap) setTab("map");
+  };
 }
 
 function select(id, pan = true) {
+  if (!id || pan) state.fromMap = false;
   state.selected = id;
   document.getElementById("list").hidden = !!id;
   document.getElementById("detail").hidden = !id;
@@ -498,7 +624,9 @@ function select(id, pan = true) {
 function setTab(tab) {
   document.querySelector(".layout").dataset.tab = tab;
   document.querySelectorAll(".tabs button").forEach((b) => b.classList.toggle("on", b.dataset.tab === tab));
-  if (tab === "map") map.invalidateSize();
+  if (tab !== "map") return;
+  map.invalidateSize();
+  if (fitPending) state.selected ? map.setView([byId(state.selected).lat, byId(state.selected).lon], 10) : fitAreas();
 }
 
 function syncToggle() {
@@ -515,7 +643,11 @@ function render() {
 
 function bind() {
   document.querySelectorAll(".seg button").forEach((b) => b.addEventListener("click", () => { state.mode = b.dataset.mode; render(); }));
-  document.querySelectorAll(".tabs button").forEach((b) => b.addEventListener("click", () => setTab(b.dataset.tab)));
+  document.querySelectorAll(".tabs button").forEach((b) => b.addEventListener("click", () => {
+    const from = document.querySelector(".layout").dataset.tab;
+    if (b.dataset.tab === "list" && from === "map" && state.selected) select(null);
+    setTab(b.dataset.tab);
+  }));
   document.getElementById("list").addEventListener("click", (e) => {
     const action = e.target.closest("[data-action]")?.dataset.action;
     if (action === "start-clear") { clearStart(); return; }
@@ -539,6 +671,18 @@ function bind() {
     render();
   };
   document.getElementById("detail").addEventListener("click", pickCard);
+  document.getElementById("detail").addEventListener("click", (e) => {
+    const tile = e.target.closest(".cam-play");
+    if (!tile) return;
+    const frame = document.createElement("iframe");
+    frame.src = tile.dataset.src;
+    frame.title = tile.getAttribute("aria-label").replace(/^Play /, "");
+    frame.allow = "autoplay; fullscreen; picture-in-picture";
+    frame.allowFullscreen = true;
+    const live = Object.assign(document.createElement("div"), { className: "cam-live" });
+    live.append(frame, Object.assign(document.createElement("span"), { textContent: frame.title }));
+    tile.replaceWith(live);
+  });
   document.getElementById("detail").addEventListener("keydown", (e) => {
     if (e.key === "Enter" || e.key === " ") { e.preventDefault(); pickCard(e); }
   });
@@ -574,10 +718,10 @@ async function main() {
     return;
   }
   const d = state.data;
-  document.getElementById("updated").textContent =
-    `Updated ${fmtTime(d.generated, { weekday: "short", hour: "numeric", minute: "2-digit" })} · NBM ${d.nbm_run ? new Date(d.nbm_run).toISOString().slice(11, 13) + "Z" : "unavailable"}`;
+  syncUpdated();
   if (state.selected && !byId(state.selected)) state.selected = null;
   avyLayer.addData(d.avalanche_zones || []);
+  map.on("zoomend", drawMarkers);
   syncDepth();
   state.start = readStore(STORE.start);
   syncStartButton();
@@ -585,6 +729,41 @@ async function main() {
   if (!state.selected) fitAreas();
   syncToggle();
   select(state.selected);
+  setInterval(checkForUpdate, REFRESH_MS);
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible" && Date.now() - lastCheck > REFRESH_MS / 6) checkForUpdate();
+  });
+}
+
+const REFRESH_MS = 30 * 60 * 1000;
+let lastCheck = Date.now();
+
+function syncUpdated() {
+  const d = state.data;
+  document.getElementById("updated").textContent =
+    `Updated ${fmtTime(d.generated, { weekday: "short", hour: "numeric", minute: "2-digit" })} · NBM ${d.nbm_run ? new Date(d.nbm_run).toISOString().slice(11, 13) + "Z" : "unavailable"}`;
+}
+
+async function checkForUpdate() {
+  lastCheck = Date.now();
+  let next;
+  try {
+    next = await (await fetch("data/latest.json", { cache: "no-cache" })).json();
+  } catch {
+    return;
+  }
+  if (next.generated === state.data.generated) return;
+  state.data = next;
+  for (const id of Object.keys(markers)) {
+    if (!byId(id)) { map.removeLayer(markers[id]); delete markers[id]; }
+  }
+  const lost = state.selected && !byId(state.selected);
+  avyLayer.clearLayers().addData(next.avalanche_zones || []);
+  if (depthAhead) { depthGroup.removeLayer(depthAhead); depthAhead = null; }
+  syncUpdated();
+  try { await loadDrive(); } catch { state.drive = null; }
+  if (lost) select(null);
+  render();
 }
 
 main();

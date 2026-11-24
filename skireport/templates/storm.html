@@ -1,20 +1,43 @@
-{% set th = "text-align:left;padding:4px 6px;border-bottom:2px solid #333;font-size:12px" %}
-{% set td = "padding:4px 6px;border-bottom:1px solid #ddd;font-size:13px" %}
+{% set h2_style = "font-family:'Space Mono',Arial,Helvetica,sans-serif;font-size:15px;font-weight:400;letter-spacing:2px;text-transform:uppercase;color:#141B21;padding-bottom:6px;border-bottom:1px solid #D0D1D2" %}
+{% set th = "text-align:left;padding:4px 6px;font-family:'Space Mono',Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:#6B6E71;font-weight:normal;border-bottom:1px solid #D0D1D2" %}
+{% set td = "padding:6px;vertical-align:top;border-bottom:1px solid #E8E9EA;font-size:13px" %}
+{% set link_style = "color:#0486DE;text-decoration:none" %}
+{% set s = summary %}
 <!doctype html>
 <html>
-<body style="margin:0;padding:16px;background:#fff;color:#111;font-family:Helvetica,Arial,sans-serif;font-size:14px;line-height:1.4">
-<h1 style="font-size:20px;margin:0 0 4px">Cascades Storm Alert</h1>
-<p style="margin:0 0 16px">Forecast through {{ through.strftime("%A, %B %-d") }}. NBM {{ nbm_run.strftime("%HZ %b %-d") }}. Thresholds: {{ snow_threshold }} in of snow, or {{ rain_threshold }} in of rain on existing snow.</p>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<link href="https://fonts.googleapis.com/css?family=Work+Sans:400,700|Space+Mono:400,700&display=swap" rel="stylesheet"></head>
+<body style="margin:0;padding:0;background:#F7F7F7;color:#202326;font-family:'Work Sans',Helvetica,Arial,sans-serif;font-size:14px;line-height:1.5">
+<table cellspacing="0" cellpadding="0" style="border-collapse:collapse;width:100%;background:#F7F7F7"><tr><td style="padding:16px 8px">
+<table cellspacing="0" cellpadding="0" style="border-collapse:collapse;width:100%;max-width:680px;margin:0 auto;background:#fff">
+<tr><td style="padding:18px 20px;background:#202326">
+<div style="font-family:'Space Mono',Arial,Helvetica,sans-serif;font-size:18px;letter-spacing:3px;text-transform:uppercase;color:#FFFFFF">Cascades Storm Alert</div>
+<div style="font-size:13px;color:#D0D1D2;margin-top:2px">Forecast through {{ through.strftime("%A, %B %-d") }} &middot; <a href="{{ site_url }}" style="color:#FFFFFF">View the map</a></div>
+</td></tr>
+<tr><td style="padding:16px 20px 20px">
+{% if s %}
+<p style="margin:0 0 8px;font-size:15px">
+{% if s.starts %}Snow from <b>{{ s.starts }}</b> through <b>{{ s.ends }}</b>{% if s.peak %}, heaviest <b>{{ s.peak }}</b>{% endif %}, across {{ s.zones|and_join }}.
+Forecast snowfall {{ s.snow_lo|inches }} to {{ s.snow_hi|inches }}{% if s.biggest %}; the most at {% for a, v in s.biggest %}{{ a.name }} ({{ v|inches }}){% if not loop.last %}, {% endif %}{% endfor %}{% endif %}.
+{% else %}Rain on existing snow across {{ s.zones|and_join }}.
+{% endif %}
+{% if s.level_lo is not none %}Snow level {{ snow_level(s.level_lo, s.level_hi) }}; below that it falls as rain.{% endif %}
+</p>
+{% if s.rain_on_snow %}<p style="margin:0 0 8px;font-size:14px">Rain on existing snow: {% for a, v in s.rain_on_snow %}{{ a.name }} ({{ "%.1f in"|format(v) }}){% if not loop.last %}, {% endif %}{% endfor %}.</p>{% endif %}
+{% endif %}
+<p style="margin:0 0 4px;font-size:12px;color:#6B6E71">Alert threshold: {{ snow_threshold }} in of snow, or {{ rain_threshold }} in of rain on existing snow, before the weekend is over. Forecast: NBM {{ nbm_run.strftime("%HZ %b %-d") }}.</p>
 {% for z in zones %}
-<h2 style="font-size:16px;margin:16px 0 6px">{{ z.zone.name }}</h2>
+<h2 style="{{ h2_style }};margin:28px 0 8px">{{ z.zone.name }}</h2>
 <table cellspacing="0" cellpadding="0" style="border-collapse:collapse;width:100%">
-<tr><th style="{{ th }}">Area</th><th style="{{ th }}">Snowfall</th><th style="{{ th }}">Rain on snow</th><th style="{{ th }}">Snow level</th></tr>
+<tr><th style="{{ th }};padding-left:0">Area</th><th style="{{ th }}">Snowfall</th><th style="{{ th }}">Rain on snow</th><th style="{{ th }};padding-right:0">Snow level</th></tr>
 {% for x in z.alerts %}
-<tr><td style="{{ td }}">{{ x.area.name }}</td><td style="{{ td }}">{{ x.snow_in|inches }}</td><td style="{{ td }}">{{ "%.1f in"|format(x.rain_in) }}</td><td style="{{ td }}">{{ snow_level(x.snow_level_min_ft, x.snow_level_max_ft) }}</td></tr>
+<tr><td style="{{ td }};padding-left:0"><a href="{{ site_url }}#area={{ x.area.id }}" style="color:#202326;text-decoration:none"><b>{{ x.area.name }}</b></a></td><td style="{{ td }}">{{ x.snow_in|inches }}</td><td style="{{ td }}">{{ "%.1f in"|format(x.rain_in) }}</td><td style="{{ td }};padding-right:0">{{ snow_level(x.snow_level_min_ft, x.snow_level_max_ft) }}</td></tr>
 {% endfor %}
 </table>
-<p style="margin:4px 0;font-size:13px"><a href="https://forecast.weather.gov/MapClick.php?lat={{ z.zone.areas[0].lat }}&lon={{ z.zone.areas[0].lon }}">NWS forecast</a>, <a href="{{ z.zone.road_link }}">road conditions</a></p>
+<p style="margin:6px 0;font-size:13px"><a href="https://forecast.weather.gov/MapClick.php?lat={{ z.zone.areas[0].lat }}&lon={{ z.zone.areas[0].lon }}" style="{{ link_style }}">NWS forecast</a> &middot; <a href="{{ z.zone.road_link }}" style="{{ link_style }}">Road conditions</a></p>
 {% endfor %}
 {% if errors %}<p style="margin:12px 0 0;font-size:12px;color:#a00">Unavailable: {{ errors|join(", ") }}.</p>{% endif %}
+</td></tr></table>
+</td></tr></table>
 </body>
 </html>

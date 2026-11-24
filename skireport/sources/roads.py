@@ -15,6 +15,7 @@ RW_LOCATIONS = {
     "mt-hood": ("GOVERNMENT CAMP", "TIMBERLINE LODGE", "BENNETT PASS/MT HOOD MEADOWS"),
     "santiam": ("SANTIAM PASS SMT", "SANTIAM JCT"),
     "bend": ("MT BACHELOR",),
+    "newberry": ("SOUTH OF BEND",),
     "willamette": ("WILLAMETTE PASS",),
     "diamond": ("E DIAMOND LAKE SMT", "W DIAMOND LAKE SMT"),
 }
@@ -30,7 +31,7 @@ def _first_sentence(text):
 CHECKPOINT_NAMES = {
     "GOVERNMENT CAMP": "Government Camp", "TIMBERLINE LODGE": "Timberline Lodge",
     "BENNETT PASS/MT HOOD MEADOWS": "Bennett Pass / Meadows", "SANTIAM PASS SMT": "Santiam Pass",
-    "SANTIAM JCT": "Santiam Junction", "MT BACHELOR": "Mt Bachelor", "WILLAMETTE PASS": "Willamette Pass",
+    "SANTIAM JCT": "Santiam Junction", "MT BACHELOR": "Mt Bachelor", "SOUTH OF BEND": "South of Bend", "WILLAMETTE PASS": "Willamette Pass",
     "E DIAMOND LAKE SMT": "Diamond Lake summit (east)", "W DIAMOND LAKE SMT": "Diamond Lake summit (west)",
 }
 

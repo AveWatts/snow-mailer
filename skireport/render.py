@@ -48,6 +48,11 @@ def tabular(area):
     return f"https://forecast.weather.gov/MapClick.php?lat={area.lat}&lon={area.lon}&FcstType=digital"
 
 
+def and_join(items):
+    items = list(items)
+    return items[0] if len(items) == 1 else ", ".join(items[:-1]) + " and " + items[-1]
+
+
 def duration(seconds):
     if seconds is None:
         return None
@@ -55,7 +60,7 @@ def duration(seconds):
     return f"{minutes // 60}h {minutes % 60:02d}m" if minutes >= 60 else f"{minutes}m"
 
 
-ENV.filters.update(inches=inches, signed=signed, feet=feet, duration=duration)
+ENV.filters.update(inches=inches, signed=signed, feet=feet, duration=duration, and_join=and_join)
 ENV.globals.update(snow_level=snow_level, level=level, temps=temps, tabular=tabular)
 
 
