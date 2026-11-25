@@ -2,16 +2,19 @@
 from datetime import timedelta
 
 from .scoring import SnowState
+from .sources.nws import LAPSE_F_PER_FT
 
 RAIN_MIN_IN = 0.2
+ICE_RAIN_IN = 0.5
 WARM_F = 34
 FREEZE_F = 30
 SNOW_DAY_MIN_IN = 1
 STRONG_WIND_MPH = 30
 
 
-def observed_history(obs):
-    """From one SNOTEL station's daily series: new snow and crust events since the last snowfall."""
+def observed_history(obs, elev_gap_ft=0):
+    """From one SNOTEL station's daily series: new snow and crust events since the last snowfall, with
+    temperatures shifted to an area elev_gap_ft above the station."""
     depth = obs.series.get("SNWD", {})
     if not depth:
         return None
@@ -28,15 +31,23 @@ def observed_history(obs):
             new[d] = gain
             last_snow = d
 
-    rain = thaw = False
+    shift = -elev_gap_ft * LAPSE_F_PER_FT
+    rain = thaw = refrozen = False
+    rain_in, first_rain = 0.0, None
     for d in days:
         if last_snow and d <= last_snow:
             continue
-        warm = tmax.get(d) is not None and tmax[d] >= WARM_F
+        hi = tmax[d] + shift if tmax.get(d) is not None else None
+        lo = tmin[d] + shift if tmin.get(d) is not None else None
+        warm = hi is not None and hi >= WARM_F
         if warm and prec.get(d, 0) >= RAIN_MIN_IN:
             rain = True
-        if warm and tmin.get(d) is not None and tmin[d] <= FREEZE_F:
+            rain_in += prec[d]
+            first_rain = first_rain or d
+        if warm and lo is not None and lo <= FREEZE_F:
             thaw = True
+        if first_rain and d > first_rain and lo is not None and lo <= FREEZE_F:
+            refrozen = True
 
     return {
         "new_2d_in": sum(v for d, v in new.items() if d > end - timedelta(days=2)),
@@ -44,6 +55,7 @@ def observed_history(obs):
         "new_7d_in": sum(v for d, v in new.items() if d > end - timedelta(days=7)),
         "rain_since_snow": rain,
         "thaw_since_snow": thaw,
+        "ice": rain_in >= ICE_RAIN_IN and refrozen,
         "last_date": end,
     }
 
@@ -92,6 +104,7 @@ def weekend_state(current: SnowState, pre, weekend):
         new_7d_in=fresh + current.new_3d_in,
         rain_since_snow=rain_after_snow or (crusted and fresh < 2 and current.rain_since_snow),
         thaw_since_snow=weekend["thaw"] or (crusted and fresh < 2 and current.thaw_since_snow),
+        ice=weekend["rain_in"] >= ICE_RAIN_IN or (fresh < 2 and (current.ice or rain >= ICE_RAIN_IN)),
         strong_wind=weekend["strong_wind"],
         groomed_hours=None,
     )

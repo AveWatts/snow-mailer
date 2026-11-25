@@ -29,7 +29,7 @@ Avalanche: {% for v in z.avalanche %}{{ v.zone }} ({{ v.center_name }}): {{ v.ra
   Weekend: {{ rated(r.weekend_status) }}; {{ cond(r.weekend_score, r.weekend_condition) }}; high / low {{ temps(r.temp_weekend) }}
   Snow:    {{ r.depth_in|inches }} deep, {{ r.new_7d_in|signed }} past week{% if r.depth_change_in is not none %} ({{ r.depth_change_in|signed }}){% endif %}, {{ r.depth_change_by_sun_in|signed }} by Sun
   Snow level (ft): now {{ level(r.snow_level_now, r.area.elev_ft) }}, Sat {{ level(r.snow_level_sat, r.area.elev_ft) }}, Sun {{ level(r.snow_level_sun, r.area.elev_ft) }}
-  Forecast table: {{ tabular(r.area) }}
+  Hourly forecast: {{ hourly_graph(r.area) }}
 {% endfor %}
 
 Roads:

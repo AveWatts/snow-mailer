@@ -101,7 +101,7 @@ def condition_confidence(kind, score, depth, base):
 
 def area_now(a, stations, model, resort, groom, road_closed, now):
     nearest = stations[0] if stations else None
-    hist = analysis.observed_history(nearest) if nearest else None
+    hist = analysis.observed_history(nearest, a.elev_ft - nearest.station.elev_ft) if nearest else None
     station_depth = nearest.latest("SNWD") if nearest else None
     model_depth = (model or {}).get("depth_in")
     if model_depth is not None:
@@ -135,6 +135,7 @@ def area_now(a, stations, model, resort, groom, road_closed, now):
         depth_in=depth, new_3d_in=new_3d, new_7d_in=new_7d,
         rain_since_snow=bool(hist and hist["rain_since_snow"]),
         thaw_since_snow=bool(hist and hist["thaw_since_snow"]),
+        ice=bool(hist and hist["ice"]),
         groomed_hours=groomed_hours,
     )
     depth_conf = (scoring.agreement([resort_depth, model_depth, comparable_station])

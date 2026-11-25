@@ -30,13 +30,18 @@ snowfall or rain-on-snow event is coming.
 
 Everything is rule-based (`skireport/scoring.py`, `skireport/analysis.py`):
 
-- **Condition (1-5):**
-  - 5 Powder: 6 in or more of new snow in 3 days, no crust since.
-  - 4 Packed powder: new snow in 7 days, or groomed in the last 48 hours.
-  - 3 Packed / Spring corn.
-  - 2 Crust / ice: rain, freeze-thaw or wind since the last snow.
+- **Condition (1-5)**, each with a short label saying why:
+  - 5 Fresh powder: 6 in or more of new snow in 3 days, no crust since.
+  - 4 Packed powder (Settled powder in the backcountry): new snow in 7 days, no crust. Freshly groomed: groomed
+    in the last 48 hours.
+  - 3, the floor for good coverage: Rain crust, Melt-freeze crust (Spring corn March to June), Wind affected,
+    or Packed / Firm, no new snow. Crust only rules out 4 and 5.
+  - 2 Rain-glazed ice: at least 0.5 in of rain since the last snow, then a hard freeze.
+  - 2 Uncovered hazards (Icy, uncovered hazards with crust): between skiable and good coverage (24 / 36 / 30
+    in).
   - 1 Too thin / No snow: below the skiable depth (12 in nordic, 18 in downhill, 12 in backcountry).
-  - Between skiable and good coverage (30 / 24 / 36 in), the condition is capped at 2 (thin cover).
+  - Rain and freeze-thaw come from the nearest SNOTEL station, with its temperatures shifted to the area's
+    elevation (3.5°F per 1,000 ft).
 - **Status:**
   - Downhill uses the resort's own report.
   - Groomed nordic uses the grooming report.

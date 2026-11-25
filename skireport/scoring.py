@@ -4,9 +4,9 @@ from dataclasses import dataclass, field
 from .config import (GOOD_DEPTH_IN, SKIABLE_DEPTH_IN, SNOW_LEVEL_RISK_FACTOR, SNOW_LEVEL_RISK_FT, SOURCE_WEIGHT,
                      WEEKEND_LEAD_FACTOR)
 
-LABELS = {5: "Powder", 4: "Packed powder", 3: "Packed powder", 2: "Crust / ice"}
+LABELS = {4: "Packed powder", 3: "Packed, no new snow"}
 # Nothing packs snow in the backcountry: the same scores describe settled snow there.
-BACKCOUNTRY_LABELS = {**LABELS, 4: "Settled powder", 3: "Firm / settled"}
+BACKCOUNTRY_LABELS = {4: "Settled powder", 3: "Firm, no new snow"}
 SPRING_MONTHS = (3, 4, 5, 6)
 
 
@@ -18,6 +18,7 @@ class SnowState:
     rain_since_snow: bool = False
     thaw_since_snow: bool = False
     strong_wind: bool = False
+    ice: bool = False
     groomed_hours: float | None = None
 
 
@@ -36,16 +37,22 @@ def condition(kind, s: SnowState, month):
     labels = BACKCOUNTRY_LABELS if kind == "backcountry" else LABELS
     crust = s.rain_since_snow or s.thaw_since_snow
     if s.depth_in < GOOD_DEPTH_IN[kind]:
-        return 2, ("Crust / ice" if crust else "Thin cover")
-    if s.new_3d_in >= 6 and not crust:
-        return 5, labels[5]
-    groomed = s.groomed_hours is not None and s.groomed_hours <= 48
-    if (s.new_7d_in >= 1 or groomed) and not crust:
-        return 4, labels[4]
-    if s.thaw_since_snow and not s.rain_since_snow and month in SPRING_MONTHS:
-        return 3, "Spring / corn"
-    if crust or s.strong_wind:
-        return 2, labels[2]
+        return 2, ("Icy, uncovered hazards" if crust else "Uncovered hazards")
+    if s.ice:
+        return 2, "Rain-glazed ice"
+    if not crust:
+        if s.new_3d_in >= 6:
+            return 5, "Fresh powder"
+        if s.new_7d_in >= 1:
+            return 4, labels[4]
+        if s.groomed_hours is not None and s.groomed_hours <= 48:
+            return 4, "Freshly groomed"
+    if s.rain_since_snow:
+        return 3, "Rain crust"
+    if s.thaw_since_snow:
+        return 3, "Spring corn" if month in SPRING_MONTHS else "Melt-freeze crust"
+    if s.strong_wind:
+        return 3, "Wind affected"
     return 3, labels[3]
 
 

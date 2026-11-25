@@ -168,38 +168,47 @@ zones:
     short: Summit Pass
   - name: Mt Hood Meadows - Base
     url: https://api.wetmet.net/widgets/stream/frame.php?uid=072e3c1a6016174851619e4180909d3d
+    preview: https://api.wetmet.net/widgets/image/frame.php?uid=d7a6360b9dff90024f21fe07423232b5&type=image&format=image.jpg
     group: Meadows
     short: Base
   - name: Mt Hood Meadows - Bottom of Vista
     url: https://api.wetmet.net/widgets/stream/frame.php?uid=1be5f08dfca10d15d5e4ec9627c17c7c
+    preview: https://api.wetmet.net/widgets/image/frame.php?uid=9998d9abcfc6daef75e09b7a553b99a1&type=image&format=image.jpg
     group: Meadows
     short: Bottom of Vista
   - name: Mt Hood Meadows - Top of Vista
     url: https://api.wetmet.net/widgets/stream/frame.php?uid=eec27f8164fc1105656ea4d46df4cd37
+    preview: https://api.wetmet.net/widgets/image/frame.php?uid=c5a90b27806182f3b7b31fc9a79d6e7e&type=image&format=image.jpg
     group: Meadows
     short: Top of Vista
   - name: Mt Hood Meadows - Top of Blue
     url: https://api.wetmet.net/widgets/stream/frame.php?uid=c878c340832e23aab90526673b71cc17
+    preview: https://api.wetmet.net/widgets/image/frame.php?uid=333155ae61a4d64093374b5330e94425&type=image&format=image.jpg
     group: Meadows
     short: Top of Blue
   - name: Mt Hood Meadows - Top of Cascade
     url: https://api.wetmet.net/widgets/stream/frame.php?uid=27a40badfb43d1ee5f6e18ff23d1545d
+    preview: https://api.wetmet.net/widgets/image/frame.php?uid=3bd9c98d890c6890f92efcfc5c1892da&type=image&format=image.jpg
     group: Meadows
     short: Top of Cascade
   - name: Mt Hood Meadows - Top of Heather
     url: https://api.wetmet.net/widgets/stream/frame.php?uid=05d8cf6ff60357a37c6f97318ad3ea8d
+    preview: https://api.wetmet.net/widgets/image/frame.php?uid=b33acd75e0ba216558a38590f4d924ae&type=image&format=image.jpg
     group: Meadows
     short: Top of Heather
   - name: Mt Hood Meadows Nordic
     url: https://api.wetmet.net/widgets/stream/frame.php?uid=1d84bd2e0e9b83af2a1c6b8dd5474f95
+    preview: https://api.wetmet.net/widgets/image/frame.php?uid=f4768c61b78bd9f60eda01318c7d546b&type=image&format=image.jpg
     group: Meadows
     short: Nordic
   - name: Skibowl West
-    url: https://video.nest.com/embedded/live/SUFOrgWa6m
+    url: https://video.nest.com/embedded/live/yuJOHWDpwf
+    preview: https://nexusapi-us1.dropcam.com/get_image?uuid=a1c1fd951e624791961a50685c4a4703&width=640&public=yuJOHWDpwf
     group: Skibowl
     short: West
   - name: Skibowl Upper Bowl
     url: https://video.nest.com/embedded/live/npsFa2hlJU
+    preview: https://nexusapi-us1.dropcam.com/get_image?uuid=7dfe9e384b434b7b9e1de62880880cd4&width=640&public=npsFa2hlJU
     group: Skibowl
     short: Upper Bowl
   - name: Skibowl East

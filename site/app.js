@@ -5,6 +5,7 @@ const KIND_LABEL = { nordic: "Nordic", downhill: "Downhill", backcountry: "Backc
 const AVY = { 1: "Low", 2: "Moderate", 3: "Considerable", 4: "High", 5: "Extreme" };
 const IMAGE = /\.(jpe?g|png)(\?|$)/i;
 const PAGE_LOADED = Date.now();
+const fresh = (url) => `${url}${url.includes("?") ? "&" : "?"}t=${PAGE_LOADED}`;
 const PLAY = `<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="rgba(32,35,38,.75)"/><path d="M10 8.2v7.6l6-3.8z" fill="#fff"/></svg>`;
 const PLAYERS = [/^https:\/\/api\.wetmet\.net\/widgets\/stream\/frame\.php/, /^https:\/\/video\.nest\.com\/embedded\//,
   /^https:\/\/vauth\.command\.verkada\.com\/.*\/embed\//, /^https:\/\/camstreamer\.com\/embed\//];
@@ -42,9 +43,9 @@ async function fillPopupThumb(box, cam) {
   if (!src) {
     const stream = urls.find((u) => /youtube\.com|youtu\.be|camstreamer\.com/.test(u));
     const yt = stream && camKind(stream)?.match(/youtube-nocookie\.com\/embed\/([\w-]{11})/);
-    const known = stream && state.data?.zones.flatMap((z) => z.webcams).find((w) => w.url === stream && w.preview);
-    if (yt) src = `https://i.ytimg.com/vi/${yt[1]}/hqdefault_live.jpg?t=${PAGE_LOADED}`;
-    else if (known) src = `${known.preview}?t=${PAGE_LOADED}`;
+    const known = state.data?.zones.flatMap((z) => z.webcams).find((w) => w.preview && urls.includes(w.url));
+    if (yt) src = fresh(`https://i.ytimg.com/vi/${yt[1]}/hqdefault_live.jpg`);
+    else if (known) src = fresh(known.preview);
   }
   if (src) {
     box.innerHTML = `<a href="${esc(open)}" target="_blank" rel="noopener"><img src="${esc(src)}" alt=""></a>`;
@@ -599,7 +600,7 @@ function renderDetail() {
     }
     if (kind) {
       const still = c.preview
-        ? `<img class="cam-still" src="${esc(c.preview)}?t=${PAGE_LOADED}" alt="" loading="lazy" onerror="this.remove()" onload="this.naturalWidth <= 120 && this.remove()">` : "";
+        ? `<img class="cam-still" src="${esc(fresh(c.preview))}" alt="" loading="lazy" onerror="this.remove()" onload="this.naturalWidth <= 120 && this.remove()">` : "";
       return `<button type="button" class="cam-play" data-src="${esc(kind)}" aria-label="Play ${esc(c.name)}"><span class="cam-screen">${still}${PLAY}<span>Live</span></span>${esc(c.short)}</button>`;
     }
     return `<a href="${esc(c.url)}" target="_blank" rel="noopener" class="cam-link">${esc(c.short)}</a>`;
@@ -607,7 +608,7 @@ function renderDetail() {
   const links = [
     a.resort_url && ["Resort report", a.resort_url],
     a.grooming_url && ["Grooming", a.grooming_url],
-    ["Forecast table", `https://forecast.weather.gov/MapClick.php?lat=${a.lat}&lon=${a.lon}&FcstType=digital`],
+    ["Hourly forecast", `https://forecast.weather.gov/MapClick.php?lat=${a.lat}&lon=${a.lon}&FcstType=graphical`],
     ["Road conditions", z.road_link],
     ["Open in CalTopo", `https://caltopo.com/map.html#ll=${a.lat},${a.lon}&z=14`],
   ].filter(Boolean);

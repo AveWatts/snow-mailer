@@ -21,25 +21,39 @@ def obs(depths, tmax=None, tmin=None, prec=None):
 class Condition(unittest.TestCase):
     def test_thin(self):
         self.assertEqual(scoring.condition("nordic", scoring.SnowState(depth_in=5), 1), (1, "Too thin"))
-        self.assertEqual(scoring.condition("backcountry", scoring.SnowState(depth_in=18), 1), (2, "Thin cover"))
+        self.assertEqual(scoring.condition("backcountry", scoring.SnowState(depth_in=18), 1), (2, "Uncovered hazards"))
         self.assertEqual(scoring.condition("nordic", scoring.SnowState(depth_in=0), 1), (1, "No snow"))
 
     def test_powder(self):
         s = scoring.SnowState(depth_in=60, new_3d_in=8, new_7d_in=8)
-        self.assertEqual(scoring.condition("downhill", s, 1), (5, "Powder"))
+        self.assertEqual(scoring.condition("downhill", s, 1), (5, "Fresh powder"))
 
     def test_rain_crust_beats_new_snow(self):
         s = scoring.SnowState(depth_in=60, new_3d_in=8, new_7d_in=8, rain_since_snow=True)
-        self.assertEqual(scoring.condition("downhill", s, 1), (2, "Crust / ice"))
+        self.assertEqual(scoring.condition("downhill", s, 1), (3, "Rain crust"))
+
+    def test_deep_crust_or_wind_is_not_a_2(self):
+        self.assertEqual(scoring.condition("backcountry", scoring.SnowState(depth_in=60, thaw_since_snow=True), 1),
+                         (3, "Melt-freeze crust"))
+        self.assertEqual(scoring.condition("backcountry", scoring.SnowState(depth_in=60, strong_wind=True), 1),
+                         (3, "Wind affected"))
+        self.assertEqual(scoring.condition("backcountry", scoring.SnowState(depth_in=60), 1), (3, "Firm, no new snow"))
+
+    def test_deep_ice(self):
+        s = scoring.SnowState(depth_in=60, rain_since_snow=True, ice=True)
+        self.assertEqual(scoring.condition("downhill", s, 1), (2, "Rain-glazed ice"))
+
+    def test_thin_crust(self):
+        s = scoring.SnowState(depth_in=20, thaw_since_snow=True)
+        self.assertEqual(scoring.condition("backcountry", s, 1), (2, "Icy, uncovered hazards"))
 
     def test_spring_corn(self):
         s = scoring.SnowState(depth_in=60, thaw_since_snow=True)
-        self.assertEqual(scoring.condition("downhill", s, 4), (3, "Spring / corn"))
-        self.assertEqual(scoring.condition("downhill", s, 1), (2, "Crust / ice"))
+        self.assertEqual(scoring.condition("downhill", s, 4), (3, "Spring corn"))
 
     def test_groomed(self):
         s = scoring.SnowState(depth_in=40, groomed_hours=20)
-        self.assertEqual(scoring.condition("nordic", s, 1), (4, "Packed powder"))
+        self.assertEqual(scoring.condition("nordic", s, 1), (4, "Freshly groomed"))
 
 
 class History(unittest.TestCase):
@@ -53,6 +67,16 @@ class History(unittest.TestCase):
     def test_cold_snow_no_crust(self):
         h = analysis.observed_history(obs([40, 44, 44], tmax=[25, 25, 25], tmin=[10, 10, 10], prec=[1, 1.5, 1.5]))
         self.assertFalse(h["rain_since_snow"] or h["thaw_since_snow"])
+
+    def test_rain_then_freeze_is_ice(self):
+        h = analysis.observed_history(obs([60, 66, 64, 63], tmax=[25, 25, 38, 28], tmin=[10, 10, 32, 15],
+                                          prec=[1, 2, 2.8, 2.8]))
+        self.assertTrue(h["rain_since_snow"] and h["ice"])
+
+    def test_warmth_at_station_is_cold_higher_up(self):
+        h = analysis.observed_history(obs([60, 66, 64, 63], tmax=[25, 25, 38, 28], tmin=[10, 10, 32, 15],
+                                          prec=[1, 2, 2.8, 2.8]), elev_gap_ft=3300)
+        self.assertFalse(h["rain_since_snow"] or h["thaw_since_snow"] or h["ice"])
 
 
 class Status(unittest.TestCase):

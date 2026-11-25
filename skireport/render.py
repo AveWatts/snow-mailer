@@ -44,8 +44,8 @@ def temps(pair):
     return f"{show(hi)} / {show(lo)}F"
 
 
-def tabular(area):
-    return f"https://forecast.weather.gov/MapClick.php?lat={area.lat}&lon={area.lon}&FcstType=digital"
+def hourly_graph(area):
+    return f"https://forecast.weather.gov/MapClick.php?lat={area.lat}&lon={area.lon}&FcstType=graphical"
 
 
 def and_join(items):
@@ -61,7 +61,7 @@ def duration(seconds):
 
 
 ENV.filters.update(inches=inches, signed=signed, feet=feet, duration=duration, and_join=and_join)
-ENV.globals.update(snow_level=snow_level, level=level, temps=temps, tabular=tabular)
+ENV.globals.update(snow_level=snow_level, level=level, temps=temps, hourly_graph=hourly_graph)
 
 
 def render(name, model):
