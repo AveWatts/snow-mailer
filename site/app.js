@@ -639,17 +639,21 @@ function renderDetail() {
 }
 
 function select(id, pan = true) {
+  const panel = document.getElementById("panel");
+  if (!state.selected && id) state.listScroll = panel.scrollTop;
   if (!id || pan) state.fromMap = false;
   state.selected = id;
   document.getElementById("list").hidden = !!id;
   document.getElementById("detail").hidden = !id;
   if (id) {
     renderDetail();
-    document.getElementById("panel").scrollTop = 0;
+    // The panel is hidden behind the Map tab on phones, and a hidden element can't be scrolled.
     setTab("list");
+    panel.scrollTop = 0;
     if (pan) map.setView([byId(id).lat, byId(id).lon], Math.max(map.getZoom(), 10));
   } else {
     renderList();
+    panel.scrollTop = state.listScroll || 0;
   }
   drawMarkers();
   writeHash();

@@ -59,7 +59,8 @@ weights in `skireport/config.py` from that table.
 - `ski-report.yml` runs Thursdays (report) and Mondays (storm check) at 14:00 UTC, **October through June only**.
 - The first step is a snow gate. It continues only if some area or nearby SNOTEL station has more than 12 in of
   snow. Permanent snow (Muir Snowfield and the summits) doesn't count. No snow means no email.
-- `dashboard.yml` rebuilds the dashboard daily at 13:30 UTC, October through June, behind the same snow gate.
+- `dashboard.yml` rebuilds the dashboard twice a day, at 03:00 and 15:00 UTC (after each NBM run is published),
+  October through June, behind the same snow gate.
 - `keepalive.yml` runs on the 1st of each month. It pushes an empty commit only if the repo has been quiet for
   30 days, because GitHub disables scheduled workflows in public repos after 60 days without activity. It
   fetches nothing and sends nothing.

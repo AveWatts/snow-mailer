@@ -1,7 +1,7 @@
 name: dashboard
 on:
   schedule:
-    - cron: "30 13 * 1-6,10-12 *"   # daily, 5:30 AM PST / 6:30 AM PDT; never July-September
+    - cron: "0 3,15 * 1-6,10-12 *"   # 7 AM and 7 PM PST, after each NBM run (12Z, 00Z) is out; never July-September
   workflow_dispatch:
 permissions:
   contents: read
